@@ -22,6 +22,8 @@ PortMaster port.
 - Sound (OpenAL). The game pauses and goes silent when the app is in the background or the
   screen is locked.
 - No emulation: the ARM64 engine runs natively.
+- GPU rendering on Adreno (Snapdragon) devices through Mesa Turnip + Zink, with automatic
+  fallback to software rendering elsewhere. Resolution: 720p (smooth) or 1080p (sharp).
 
 Tested on the **AYN Odin 2 Portal** (Snapdragon 8 Gen 2, Android 13).
 
@@ -67,9 +69,8 @@ OpenKatana uses a classic FPS layout. It is applied at every launch, like the po
 
 ## Current limitations
 
-- **Software rendering** (Mesa llvmpipe), at 1280x720 scaled to the screen. Playable on a
-  Snapdragon 8 Gen 2, but not always smooth. Adreno GPU acceleration (Mesa Turnip + Zink) is
-  being worked on.
+- GPU rendering requires an Adreno GPU (Snapdragon). Other devices (Mali, PowerVR…) use
+  software rendering (Mesa llvmpipe), which is much slower and heats the device.
 - A few texts that only exist in the 2023 engine of the port stay in English.
 - **ARM64** devices only (arm64-v8a), Android 8.0 or newer.
 
@@ -83,6 +84,7 @@ OpenKatana provides a small Linux environment, like PortMaster does on Linux han
 ```
 Android app (Java)
  ├─ proot ─► minimal Debian arm64 ─► Xvfb (virtual X screen) ─► Daikatana engine
+ │                                     ├─ OpenGL: Mesa Zink -> Vulkan Turnip -> Adreno GPU (KGSL)
  │                                     └─ libdkbridge.so (LD_PRELOAD): virtual SDL gamepad,
  │                                        pause, translation of the engine's texts
  ├─ shows the Xvfb framebuffer (mmap) with OpenGL ES, scaled to the screen
@@ -100,7 +102,7 @@ game starts.
 | Path | Content |
 |---|---|
 | `android/app/` | Android app |
-| `android/runtime/` | Linux runtime build: rootfs, bridge library, sound, proot |
+| `android/runtime/` | Linux runtime build: rootfs, Mesa Turnip, bridge library, sound, proot |
 | `.github/workflows/release.yml` | APK build and release |
 
 ## Building
@@ -133,13 +135,16 @@ Requirements: JDK 17+, Android SDK (platform 36), Python 3, Docker (with ARM64 e
 x86_64 PC). No game or engine file is needed to build.
 
 ```sh
-# 1. ARM64 Linux runtime -> android/runtime/out/rootfs.tgz
+# 1. Mesa Turnip + Zink, cross-compiled -> android/runtime/out/turnip.tgz
+docker run --rm -v "$PWD:/src" debian:trixie sh /src/android/runtime/build-mesa.sh
+
+# 2. ARM64 Linux runtime -> android/runtime/out/rootfs.tgz
 docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie sh /src/android/runtime/build-runtime.sh
 
-# 2. proot (Termux packages) -> android/app/src/main/jniLibs/arm64-v8a/
+# 3. proot (Termux packages) -> android/app/src/main/jniLibs/arm64-v8a/
 python3 android/runtime/prepare-proot.py
 
-# 3. APK
+# 4. APK
 cd android && ./gradlew assembleRelease
 ```
 

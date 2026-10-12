@@ -25,6 +25,11 @@ final class GameData {
     private static final String PREFS = "daikatana";
     private static final String KEY_DATA_PATH = "data_path";
     private static final String KEY_LANGUAGE = "language";
+    private static final String KEY_RENDER_HEIGHT = "render_height";
+    private static final String KEY_GPU_FAILED = "gpu_failed";
+
+    /** Hauteurs de rendu proposees (largeur au format de l'ecran) : 720p fluide, 1080p net. */
+    static final int[] RENDER_HEIGHTS = {720, 1080};
 
     /** Langues du patch 1.3 : code du module (language_<code>.so) et nom affiche. */
     static final String[] LANGUAGES = {"english", "french", "german", "italian", "spanish"};
@@ -61,6 +66,23 @@ final class GameData {
             if (LANGUAGES[i].equals(language)) return LANGUAGE_NAMES[i];
         }
         return language;
+    }
+
+    static int getRenderHeight(Context context) {
+        return prefs(context).getInt(KEY_RENDER_HEIGHT, RENDER_HEIGHTS[0]);
+    }
+
+    static void saveRenderHeight(Context context, int height) {
+        prefs(context).edit().putInt(KEY_RENDER_HEIGHT, height).apply();
+    }
+
+    /** Vrai si le rendu GPU a echoue sur cet appareil : on reste alors en rendu logiciel. */
+    static boolean isGpuFailed(Context context) {
+        return prefs(context).getBoolean(KEY_GPU_FAILED, false);
+    }
+
+    static void setGpuFailed(Context context, boolean failed) {
+        prefs(context).edit().putBoolean(KEY_GPU_FAILED, failed).apply();
     }
 
     private static SharedPreferences prefs(Context context) {

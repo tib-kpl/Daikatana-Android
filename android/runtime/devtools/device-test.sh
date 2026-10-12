@@ -17,7 +17,7 @@ $D/bin/proot -0 --link2symlink -r $R \
   -b $D/game:/game -b $D/home:/home/dk -w /game \
   /usr/bin/env -i HOME=/home/dk LANG=C.UTF-8 PATH=/usr/sbin:/usr/bin:/sbin:/bin \
   DK_WIDTH=${DK_WIDTH:-1280} DK_HEIGHT=${DK_HEIGHT:-720} \
-  DK_LANGUAGE=${DK_LANGUAGE:-english} DK_LANG_DIR=${DK_LANG_DIR:-/game/lang} \
+  DK_LANGUAGE=${DK_LANGUAGE:-english} DK_LANG_DIR=${DK_LANG_DIR:-/game/lang}   DK_RENDERER=${DK_RENDERER:-software} DK_DEBUG=1 \
   /bin/sh /opt/dk/run.sh "$@" > $D/game.log 2>&1 &
 
 sleep $SECONDS_TO_RUN

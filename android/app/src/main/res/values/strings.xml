@@ -7,6 +7,8 @@
     <string name="btn_pick">Choisir le dossier du jeu</string>
     <string name="btn_grant">Autoriser l\'accès aux fichiers</string>
     <string name="btn_play">Jouer</string>
+    <string name="btn_resolution_720">Résolution : 720p (fluide)</string>
+    <string name="btn_resolution_1080">Résolution : 1080p (net)</string>
     <string name="btn_language">Langue du jeu : %1$s</string>
 
     <string name="status_need_permission">OpenKatana a besoin de l\'accès aux fichiers pour lire les données du jeu (pak1.pak, pak2.pak, pak3.pak).</string>

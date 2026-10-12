@@ -29,6 +29,7 @@ public class LauncherActivity extends Activity {
     private Button pickButton;
     private Button playButton;
     private Button languageButton;
+    private Button resolutionButton;
 
     /** Vrai quand on vient du raccourci "Changer le dossier" : pas de lancement auto. */
     private boolean forcePick;
@@ -45,6 +46,9 @@ public class LauncherActivity extends Activity {
         languageButton = findViewById(R.id.language);
         languageButton.setOnClickListener(v -> cycleLanguage());
         updateLanguageButton();
+        resolutionButton = findViewById(R.id.resolution);
+        resolutionButton.setOnClickListener(v -> cycleResolution());
+        updateResolutionButton();
         forcePick = ACTION_CHANGE_FOLDER.equals(getIntent().getAction());
     }
 
@@ -102,10 +106,25 @@ public class LauncherActivity extends Activity {
         int i = java.util.Arrays.asList(GameData.LANGUAGES).indexOf(current);
         GameData.saveLanguage(this, GameData.LANGUAGES[(i + 1) % GameData.LANGUAGES.length]);
         updateLanguageButton();
+        resolutionButton = findViewById(R.id.resolution);
+        resolutionButton.setOnClickListener(v -> cycleResolution());
+        updateResolutionButton();
     }
 
     private void updateLanguageButton() {
         languageButton.setText(getString(R.string.btn_language, GameData.languageName(GameData.getLanguage(this))));
+    }
+
+    private void cycleResolution() {
+        int current = GameData.getRenderHeight(this);
+        GameData.saveRenderHeight(this, current == GameData.RENDER_HEIGHTS[0]
+                ? GameData.RENDER_HEIGHTS[1] : GameData.RENDER_HEIGHTS[0]);
+        updateResolutionButton();
+    }
+
+    private void updateResolutionButton() {
+        boolean smooth = GameData.getRenderHeight(this) == GameData.RENDER_HEIGHTS[0];
+        resolutionButton.setText(smooth ? R.string.btn_resolution_720 : R.string.btn_resolution_1080);
     }
 
     private void launchGame(File dataDir) {

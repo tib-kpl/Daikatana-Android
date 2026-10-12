@@ -15,7 +15,8 @@ source code is available at the addresses below.
 ## Linux runtime (Debian 13 "trixie" arm64 packages)
 
 The bundled rootfs (`assets/runtime/rootfs.tgz`) only contains files from unmodified Debian
-packages, plus OpenKatana's own files under `/opt/dk` and `/etc/asound.conf`. Its main
+packages, plus OpenKatana's own files under `/opt/dk` and `/etc/asound.conf`, and the Mesa
+build described below under `/opt/turnip`. Its main
 components are glibc, SDL2, OpenAL Soft, Mesa, the X.Org Xvfb server, libvorbis and dash.
 
 - Exact list of packages and versions: `packages.txt`, attached to every release and included
@@ -24,6 +25,13 @@ components are glibc, SDL2, OpenAL Soft, Mesa, the X.Org Xvfb server, libvorbis 
   (`/usr/share/doc/<package>/copyright`).
 - Sources: https://sources.debian.org, or https://snapshot.debian.org for an exact version
   (`apt-get source <package>=<version>`).
+
+## Mesa (Turnip Vulkan driver and Zink OpenGL driver)
+
+- License: MIT (and other permissive licenses, see `docs/license.rst` in the Mesa sources)
+- Built from the official Mesa release by `android/runtime/build-mesa.sh` (version and build
+  options in that script), installed in the rootfs under `/opt/turnip`.
+- Sources: https://archive.mesa3d.org and https://gitlab.freedesktop.org/mesa/mesa
 
 ## Not redistributed
 

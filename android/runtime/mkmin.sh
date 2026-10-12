@@ -33,12 +33,14 @@ $LIB/libEGL.so.1 $LIB/libEGL_mesa.so.0 $LIB/libgbm.so.1 $LIB/libX11-xcb.so.1 \
 $LIB/libXcursor.so.1 $LIB/libXi.so.6 $LIB/libXrandr.so.2 $LIB/libXss.so.1 $LIB/libXxf86vm.so.1 \
 $LIB/libXfixes.so.3 $LIB/libxkbcommon.so.0 $LIB/libdl.so.2 $LIB/libpthread.so.0 $LIB/libm.so.6 $LIB/librt.so.1"
 DRI=$(ls $LIB/dri/*.so $LIB/gbm/*.so $LIB/libgallium-*.so 2>/dev/null)
+# Mesa Turnip + Zink (optionnel) et chargeur Vulkan qu'il ouvre par dlopen
+TURNIP=$(ls /opt/turnip/lib/*.so* $LIB/libvulkan.so.1 2>/dev/null || true)
 
-for f in $BINS $DLOPEN $DRI; do copy "$f"; done
+for f in $BINS $DLOPEN $DRI $TURNIP; do copy "$f"; done
 
 # Fermeture des dependances (ldd), iteree jusqu'a stabilite
 deps() { ldd "$1" 2>/dev/null | awk '/=>/ { print $3 } /^\t\/.*ld-linux/ { print $1 }' | grep '^/' ; }
-todo="$BINS $DLOPEN $DRI"
+todo="$BINS $DLOPEN $DRI $TURNIP"
 seen=""
 while [ -n "$todo" ]; do
     next=""
@@ -59,5 +61,6 @@ copy /usr/share/X11/xkb /usr/share/X11/locale /usr/share/alsa /usr/share/glvnd /
      /usr/lib/xorg/protocol.txt /usr/share/X11/XErrorDB
 copy /etc/passwd /etc/group /etc/nsswitch.conf /etc/ld.so.conf /etc/ld.so.conf.d /etc/asound.conf
 copy /opt/dk
+[ -d /opt/turnip ] && copy /opt/turnip/share
 
 echo "termine : $(du -sh "$OUT" | cut -f1)"

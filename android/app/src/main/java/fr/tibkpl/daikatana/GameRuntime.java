@@ -43,7 +43,15 @@ final class GameRuntime {
         return new File(context.getFilesDir(), "daikatana.log");
     }
 
-    java.lang.Process start(int width, int height, int inputPort) throws IOException {
+    /**
+     * Rendu GPU possible : GPU Adreno accessible (interface KGSL) et Mesa Turnip present dans
+     * le runtime. Sinon rendu logiciel (Mesa llvmpipe).
+     */
+    boolean gpuAvailable() {
+        return new File("/dev/kgsl-3d0").canRead() && new File(config.rootfsDir, "opt/turnip/lib").isDirectory();
+    }
+
+    java.lang.Process start(int width, int height, int inputPort, boolean gpu) throws IOException {
         String libDir = context.getApplicationInfo().nativeLibraryDir;
         File prootTmp = new File(context.getCacheDir(), "proot");
         if (!prootTmp.isDirectory() && !prootTmp.mkdirs()) throw new IOException("Creation impossible : " + prootTmp);
@@ -75,6 +83,7 @@ final class GameRuntime {
         cmd.add("DK_INPUT_PORT=" + inputPort);
         cmd.add("DK_LANGUAGE=" + config.language);
         cmd.add("DK_LANG_DIR=/game/lang");
+        cmd.add("DK_RENDERER=" + (gpu ? "gpu" : "software"));
         cmd.add("/bin/sh");
         cmd.add("/opt/dk/run.sh");
 

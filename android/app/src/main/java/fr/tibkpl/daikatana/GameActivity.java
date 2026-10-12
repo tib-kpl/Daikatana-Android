@@ -29,12 +29,6 @@ public class GameActivity extends Activity {
 
     private static final String TAG = "Daikatana";
 
-    /**
-     * Hauteur de rendu du moteur (largeur deduite du format de l'ecran, donc 16:9 sur un
-     * ecran 16:9). L'image est ensuite agrandie par le GPU a la taille de l'ecran.
-     */
-    private static final int RENDER_HEIGHT = 720;
-
     private FrameLayout root;
     private TextView message;
     private GameRuntime runtime;
@@ -95,7 +89,9 @@ public class GameActivity extends Activity {
             input = new InputBridge();
 
             Point screen = screenSize();
-            int height = Math.min(RENDER_HEIGHT, screen.y);
+            // Hauteur de rendu choisie (largeur au format de l'ecran, donc 16:9 sur un ecran
+            // 16:9) ; l'image est ensuite agrandie a la taille de l'ecran.
+            int height = Math.min(GameData.getRenderHeight(this), screen.y);
             int width = Math.round(height * (float) screen.x / screen.y) & ~1;
 
             runtime.framebufferFile().delete();
@@ -103,10 +99,12 @@ public class GameActivity extends Activity {
             root.addView(view, 0, new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
-            java.lang.Process process = runtime.start(width, height, input.port());
+            boolean gpu = runtime.gpuAvailable() && !GameData.isGpuFailed(this);
+            Log.i(TAG, "Rendu " + (gpu ? "GPU (Turnip + Zink)" : "logiciel") + ", " + width + "x" + height);
+            java.lang.Process process = runtime.start(width, height, input.port(), gpu);
             message.setText(R.string.game_starting);
             message.postDelayed(() -> message.setVisibility(View.GONE), 4000);
-            watch(process);
+            watch(process, gpu);
         } catch (Exception e) {
             Log.e(TAG, "Lancement", e);
             message.setText(getString(R.string.game_error, e.getMessage()));
@@ -114,7 +112,7 @@ public class GameActivity extends Activity {
     }
 
     /** Ferme l'ecran quand le jeu se termine ; affiche le journal s'il plante au demarrage. */
-    private void watch(java.lang.Process process) {
+    private void watch(java.lang.Process process, boolean gpu) {
         long startedAt = System.currentTimeMillis();
         Thread watcher = new Thread(() -> {
             int code;
@@ -128,7 +126,12 @@ public class GameActivity extends Activity {
             String tail = runtime.logTail(25);
             Log.i(TAG, "Moteur termine (code " + code + ")\n" + tail);
             runOnUiThread(() -> {
-                if (early && code != 0) {
+                if (early && code != 0 && gpu) {
+                    // Le rendu GPU ne fonctionne pas sur cet appareil : relance en rendu logiciel
+                    Log.w(TAG, "Echec du rendu GPU, passage en rendu logiciel");
+                    GameData.setGpuFailed(this, true);
+                    recreate();
+                } else if (early && code != 0) {
                     message.setVisibility(View.VISIBLE);
                     message.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
                     message.setTextSize(12);

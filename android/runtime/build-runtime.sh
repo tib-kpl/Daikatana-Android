@@ -13,7 +13,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
 apt-get install -y -q --no-install-recommends \
     libsdl2-2.0-0 libopenal1 libvorbisfile3 libstdc++6 libgl1 libgl1-mesa-dri libglx-mesa0 \
-    libegl1 xvfb x11-xkb-utils xkb-data \
+    libegl1 libvulkan1 xvfb x11-xkb-utils xkb-data \
     gcc libc6-dev libsdl2-dev
 
 # 2. Fichiers propres au runtime (run.sh, asound.conf) et pont manette (LD_PRELOAD)
@@ -23,6 +23,13 @@ gcc -O2 -shared -fPIC -Wall -o /opt/dk/libdkbridge.so \
     "$RUNTIME/dkbridge/dkbridge.c" "$RUNTIME/dkbridge/dklang.c" \
     $(sdl2-config --cflags) -ldl -lpthread
 
+# Mesa Turnip + Zink (GPU Adreno), compile par build-mesa.sh
+if [ -f "$OUT/turnip.tgz" ]; then
+    tar -C / -xzf "$OUT/turnip.tgz"
+else
+    echo "turnip.tgz absent : runtime sans acceleration GPU"
+fi
+
 # 3. Rootfs minimal : uniquement les fichiers utilises (fermeture des dependances)
 mkdir -p "$OUT"
 sh "$RUNTIME/mkmin.sh" /tmp/rootfs
@@ -30,7 +37,7 @@ echo "nameserver 1.1.1.1" > /tmp/rootfs/etc/resolv.conf
 
 # 4. Liste des paquets Debian redistribues (licences, sources : https://sources.debian.org)
 #    et licences correspondantes, dans le rootfs et a cote de l'archive
-(cd /tmp/rootfs && find . -type f -o -type l) | sed 's|^\.||' | grep -v '^/opt/dk/' \
+(cd /tmp/rootfs && find . -type f -o -type l) | sed 's|^\.||' | grep -v '^/opt/' \
     | xargs dpkg -S 2>/dev/null | cut -d: -f1 | tr ',' '\n' | sed 's/ //g' | sort -u > /tmp/pkgs
 mkdir -p /tmp/rootfs/usr/share/doc/openkatana
 xargs dpkg-query -W -f '${Package} ${Version} (source : ${source:Package} ${source:Version})\n' \

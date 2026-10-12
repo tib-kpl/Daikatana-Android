@@ -17,11 +17,40 @@ permissions:
   contents: write
 
 jobs:
-  runtime:
-    name: Runtime Linux arm64
+  mesa:
+    name: Mesa Turnip arm64
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      # Compilation croisee (rapide) mise en cache : refaite seulement si build-mesa.sh change
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: android/runtime/out/turnip.tgz
+          key: turnip-${{ hashFiles('android/runtime/build-mesa.sh') }}
+
+      - name: Compilation de Mesa (croisee x86_64 -> arm64)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: docker run --rm -v "$PWD:/src" debian:trixie sh /src/android/runtime/build-mesa.sh
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: turnip
+          path: android/runtime/out/turnip.tgz
+          retention-days: 1
+
+  runtime:
+    name: Runtime Linux arm64
+    needs: mesa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: turnip
+          path: android/runtime/out
 
       - name: Emulation arm64
         uses: docker/setup-qemu-action@v3
@@ -106,7 +135,9 @@ jobs:
           path: android/${{ env.APK_NAME }}
           retention-days: 1 # l'APK durable est celle attachee a la release
 
+      # Release uniquement depuis main (une autre branche lancee a la main ne publie rien)
       - name: Release GitHub
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
