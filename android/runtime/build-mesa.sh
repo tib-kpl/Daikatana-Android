@@ -12,7 +12,7 @@ export DEBIAN_FRONTEND=noninteractive
 dpkg --add-architecture arm64
 apt-get update -q
 apt-get install -y -q --no-install-recommends \
-    crossbuild-essential-arm64 meson ninja-build python3-mako python3-yaml python3-packaging \
+    crossbuild-essential-arm64 binutils meson ninja-build python3-mako python3-yaml python3-packaging \
     glslang-tools bison flex pkg-config wget xz-utils ca-certificates \
     libdrm-dev:arm64 libx11-dev:arm64 libxext-dev:arm64 libxfixes-dev:arm64 libxcb-glx0-dev:arm64 \
     libxcb-shm0-dev:arm64 libx11-xcb-dev:arm64 libxcb-dri2-0-dev:arm64 libxcb-dri3-dev:arm64 \
@@ -31,6 +31,7 @@ c = 'aarch64-linux-gnu-gcc'
 cpp = 'aarch64-linux-gnu-g++'
 ar = 'aarch64-linux-gnu-ar'
 strip = 'aarch64-linux-gnu-strip'
+nm = 'aarch64-linux-gnu-nm'
 pkg-config = 'pkg-config'
 
 [properties]
