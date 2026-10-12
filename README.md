@@ -6,7 +6,8 @@ consoles portables et smartphones Android ARM64, grâce au moteur du patch commu
 
 > [!IMPORTANT]
 > **Vous devez posséder le jeu.** OpenKatana ne contient **aucun fichier du jeu** : ni
-> niveaux, ni textures, ni sons, ni musiques. Pour jouer, il vous faut une copie légale de
+> niveaux, ni textures, ni sons, ni musiques. Il ne contient pas non plus le moteur
+> Daikatana 1.3. Pour jouer, il vous faut une copie légale de
 > Daikatana pour PC (par exemple [GOG](https://www.gog.com/game/daikatana) ou
 > [Steam](https://store.steampowered.com/app/242980/Daikatana/)) et copier son dossier
 > `data` sur l'appareil. Sans ces fichiers, l'application refuse de lancer le jeu.
@@ -37,8 +38,10 @@ Testé sur **AYN Odin 2 Portal** (Snapdragon 8 Gen 2, Android 13).
    - autorisez l'**accès à tous les fichiers** : le moteur lit les fichiers du jeu à leur
      emplacement, sans les copier ;
    - choisissez le dossier `data`, ou le dossier qui le contient.
-4. Au premier lancement, le runtime Linux est installé (environ 30 secondes, une seule fois),
-   puis le jeu démarre. Aux lancements suivants, le jeu démarre directement.
+4. Au premier lancement, OpenKatana installe son runtime Linux et **télécharge le moteur**
+   (port Daikatana de PortMaster, 14 Mo) depuis la source officielle de PortMaster. Une
+   connexion Internet est donc nécessaire la première fois, puis le jeu démarre. Aux
+   lancements suivants, le jeu démarre directement, sans connexion.
 
 Pour changer de dossier plus tard : **appui long sur l'icône → « Changer le dossier du jeu »**.
 
@@ -73,8 +76,10 @@ modifient dans le menu du jeu.
 
 ## Fonctionnement
 
-Le moteur du port est un exécutable **Linux** ARM64 (glibc, SDL2, OpenAL), qu'Android ne
-peut pas lancer directement. OpenKatana fournit donc un petit environnement Linux, comme le
+Le moteur est le port PortMaster de Daikatana 1.3, téléchargé depuis
+[PortMaster](https://github.com/PortsMaster/PortMaster-New) au premier lancement (MD5
+vérifié). C'est un exécutable **Linux** ARM64 (glibc, SDL2, OpenAL), qu'Android ne peut pas
+lancer directement. OpenKatana fournit donc un petit environnement Linux, comme le
 fait PortMaster sur les consoles Linux :
 
 ```
@@ -90,8 +95,6 @@ Appli Android (Java)
 
 | Chemin | Contenu |
 |---|---|
-| `daikatana/` | Port PortMaster d'origine (moteur 1.3 ARM64, `pak4.pak` du patch, configs) |
-| `Daikatana.sh` | Script de lancement PortMaster d'origine |
 | `android/app/` | Application Android |
 | `android/runtime/` | Construction du runtime Linux : rootfs, pont manette, son, proot |
 | `.github/workflows/release.yml` | Construction et publication de l'APK |
@@ -130,7 +133,7 @@ de debug. Gardez `release.jks` en lieu sûr et ne le commitez pas.
 ### En local
 
 Prérequis : JDK 17+, SDK Android (plateforme 36), Python 3, Docker (avec émulation ARM64 sur
-un PC x86_64).
+un PC x86_64). Aucun fichier du jeu ni du moteur n'est nécessaire pour compiler.
 
 ```sh
 # 1. Runtime Linux arm64 -> android/runtime/out/rootfs.tgz
@@ -151,10 +154,11 @@ appareil via adb, hors de l'application.
 - **Daikatana** © Ion Storm / Eidos Interactive (Square Enix). Marques et contenus du jeu
   appartiennent à leurs propriétaires. Ce projet n'est **ni affilié ni approuvé** par eux.
 - **Daikatana 1.3** : patch communautaire de Frank Sapone (maraakate) et de son équipe,
-  https://github.com/maraakate/daikatana. Le moteur est redistribué tel que fourni par le
-  port PortMaster.
-- **Port PortMaster** : JohnnyonFlame, https://portmaster.games.
+  https://github.com/maraakate/daikatana.
+- **Port PortMaster** : JohnnyonFlame, https://portmaster.games. Il n'est pas redistribué
+  par ce projet : l'application le télécharge depuis PortMaster.
 - **proot** (GPL-2.0) et **libtalloc** (LGPL-3.0) : paquets [Termux](https://termux.dev).
 - **Runtime Linux** : paquets [Debian](https://www.debian.org) 13 (SDL2, OpenAL Soft,
   Mesa, Xorg Xvfb, glibc…), chacun sous sa propre licence.
+- Détail des licences et accès aux sources : [THIRD_PARTY.md](THIRD_PARTY.md).
 - Icône et illustration d'OpenKatana : créations originales du projet.

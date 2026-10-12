@@ -33,7 +33,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: rootfs
-          path: android/runtime/out/rootfs.tgz
+          path: |
+            android/runtime/out/rootfs.tgz
+            android/runtime/out/packages.txt
           retention-days: 1 # quota de stockage limite en depot prive
 
   apk:
@@ -56,10 +58,12 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: android-actions/setup-android@v3
-
+      # SDK Android preinstalle sur les runners GitHub ($ANDROID_HOME)
       - name: SDK Android
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: |
+          SDKMANAGER=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | sort -V | tail -n 1)
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
       - name: proot (paquets Termux)
         run: python3 runtime/prepare-proot.py
@@ -106,5 +110,7 @@ jobs:
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
-          files: android/${{ env.APK_NAME }}
+          files: |
+            android/${{ env.APK_NAME }}
+            android/runtime/out/packages.txt
           generate_release_notes: true

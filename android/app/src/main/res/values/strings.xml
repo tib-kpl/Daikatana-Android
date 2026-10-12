@@ -20,5 +20,6 @@
     <string name="game_starting">Démarrage du jeu…</string>
     <string name="game_exited">Le jeu s\'est arrêté (code %1$d).\n\n%2$s</string>
     <string name="install_runtime">Installation du runtime Linux… %1$d %%\n(première fois uniquement)</string>
-    <string name="install_port">Installation du moteur…</string>
+    <string name="install_port">Téléchargement du moteur depuis PortMaster… %1$d %%
+(première fois uniquement, connexion Internet requise)</string>
 </resources>

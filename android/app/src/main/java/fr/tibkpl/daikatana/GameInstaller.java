@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Locale;
@@ -46,9 +47,7 @@ final class GameInstaller {
     }
 
     private static final String ASSET_ROOTFS = "runtime/rootfs.tgz";
-    private static final String ASSETS_PORT = "port";
-    private static final String ASSETS_GAMEDATA = "port/gamedata";
-    private static final String ASSETS_CFGS = "port/cfgs";
+    private static final String ASSET_AUTOEXEC = "runtime/autoexec.cfg";
     private static final String KEY_INSTALLED_VERSION = "installed_version";
 
     private GameInstaller() {}
@@ -62,7 +61,7 @@ final class GameInstaller {
         File saveGameDir = new File(homeDir, ".local/share/Daikatana/gamedata");
         AssetManager assets = context.getAssets();
 
-        // Runtime et fichiers du port : reinstalles a chaque nouvelle version de l'APK.
+        // Runtime Linux : reinstalle a chaque nouvelle version de l'APK.
         SharedPreferences prefs = context.getSharedPreferences("daikatana", Context.MODE_PRIVATE);
         int version = appVersion(context);
         if (prefs.getInt(KEY_INSTALLED_VERSION, -1) != version) {
@@ -74,15 +73,18 @@ final class GameInstaller {
                         context.getString(R.string.install_runtime, total > 0 ? (int) (read * 100 / total) : 0)));
             }
 
-            progress.onStep(context.getString(R.string.install_port));
-            deleteRecursively(baseDir);
-            mkdirs(gameDir);
-            copyAssetTree(assets, ASSETS_GAMEDATA, gameDir);
-            copyAssetFile(assets, ASSETS_PORT + "/daikatana", new File(baseDir, "daikatana"));
-            copyAssetTree(assets, ASSETS_PORT + "/libs.aarch64", new File(baseDir, "libs.aarch64"));
-            chmod(new File(baseDir, "daikatana"), 0755);
-
             prefs.edit().putInt(KEY_INSTALLED_VERSION, version).apply();
+        }
+
+        // Moteur : port PortMaster telecharge depuis sa source officielle (non redistribue).
+        File engine = new File(baseDir, "daikatana");
+        if (!engine.isFile()) {
+            deleteRecursively(baseDir);
+            mkdirs(baseDir);
+            progress.onStep(context.getString(R.string.install_port, 0));
+            PortDownloader.install(context.getCacheDir(), baseDir,
+                    percent -> progress.onStep(context.getString(R.string.install_port, percent)));
+            chmod(engine, 0755);
         }
 
         progress.onStep(context.getString(R.string.game_preparing));
@@ -93,7 +95,7 @@ final class GameInstaller {
         // Comme Daikatana.sh : pas de .cfg obsoletes dans gamedata, configs du port recopiees.
         File[] stale = gameDir.listFiles((dir, name) -> name.endsWith(".cfg") && !Files.isSymbolicLink(new File(dir, name).toPath()));
         if (stale != null) for (File f : stale) f.delete();
-        copyAssetTree(assets, ASSETS_CFGS, saveGameDir);
+        installConfigs(assets, new File(baseDir, "cfgs"), saveGameDir);
 
         linkUserData(userDataDir, gameDir);
 
@@ -130,16 +132,21 @@ final class GameInstaller {
         }
     }
 
-    private static void copyAssetTree(AssetManager assets, String path, File dest) throws IOException {
-        String[] children = assets.list(path);
-        if (children == null || children.length == 0) {
-            copyAssetFile(assets, path, dest);
-            return;
+    /**
+     * Configs du port + reglages Android : OpenGL de bureau (Mesa) au lieu du mode GLES du
+     * port, lu avant autoexec.cfg et qui donne des textures corrompues ; autoexec.cfg de l'appli.
+     */
+    private static void installConfigs(AssetManager assets, File portCfgs, File saveGameDir) throws IOException {
+        File[] cfgs = portCfgs.listFiles();
+        if (cfgs == null) throw new IOException("Configs du port absentes : " + portCfgs);
+        for (File cfg : cfgs) {
+            String text = new String(Files.readAllBytes(cfg.toPath()), StandardCharsets.ISO_8859_1);
+            if (cfg.getName().equals("daikatana13.cfg")) {
+                text = text.replace("set gl_forcegles \"2\"", "set gl_forcegles \"0\"");
+            }
+            Files.write(new File(saveGameDir, cfg.getName()).toPath(), text.getBytes(StandardCharsets.ISO_8859_1));
         }
-        mkdirs(dest);
-        for (String child : children) {
-            copyAssetTree(assets, path + "/" + child, new File(dest, child));
-        }
+        copyAssetFile(assets, ASSET_AUTOEXEC, new File(saveGameDir, "autoexec.cfg"));
     }
 
     private static void copyAssetFile(AssetManager assets, String path, File dest) throws IOException {

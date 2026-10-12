@@ -2,12 +2,10 @@ plugins {
     id("com.android.application")
 }
 
-// Embarques dans l'APK (assets) :
-//   port/     moteur du port PortMaster (../../daikatana) : binaire, libs, gamedata, cfgs
-//   runtime/  rootfs Linux arm64 (runtime/out/rootfs.tgz : extension .tgz car AGP decompresse
-//             les assets .gz ; voir runtime/README.md)
-abstract class SyncPortAssets : DefaultTask() {
-    @get:InputDirectory abstract val portDir: DirectoryProperty
+// Embarques dans l'APK (assets/runtime) : le runtime Linux arm64 (runtime/out/rootfs.tgz,
+// .tgz car AGP decompresse les assets .gz) et l'autoexec.cfg de l'appli. Le moteur (port
+// PortMaster) n'est pas embarque : l'appli le telecharge depuis PortMaster (PortDownloader).
+abstract class SyncRuntimeAssets : DefaultTask() {
     @get:InputFile abstract val autoexec: RegularFileProperty
     @get:InputFile abstract val rootfs: RegularFileProperty
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
@@ -16,25 +14,14 @@ abstract class SyncPortAssets : DefaultTask() {
     @TaskAction
     fun run() {
         fs.sync {
-            from(portDir) {
-                include("daikatana", "libs.aarch64/**", "gamedata/**", "cfgs/**")
-                exclude("cfgs/autoexec.cfg")
-                into("port")
-                // Mesa fournit l'OpenGL de bureau ; le mode GLES du port (lu avant autoexec.cfg)
-                // donne des textures corrompues.
-                filesMatching("cfgs/daikatana13.cfg") {
-                    filter { line -> line.replace("set gl_forcegles \"2\"", "set gl_forcegles \"0\"") }
-                }
-            }
-            from(autoexec) { into("port/cfgs") }
+            from(autoexec) { into("runtime") }
             from(rootfs) { into("runtime") }
             into(outputDir)
         }
     }
 }
 
-val syncPortAssets = tasks.register<SyncPortAssets>("syncPortAssets") {
-    portDir.set(rootProject.layout.projectDirectory.dir("../daikatana"))
+val syncRuntimeAssets = tasks.register<SyncRuntimeAssets>("syncRuntimeAssets") {
     autoexec.set(rootProject.layout.projectDirectory.file("runtime/autoexec.cfg"))
     rootfs.set(rootProject.layout.projectDirectory.file("runtime/out/rootfs.tgz"))
 }
@@ -79,7 +66,7 @@ android {
     }
 
     androidResources {
-        noCompress += listOf("pak", "tgz")
+        noCompress += "tgz"
     }
 
     compileOptions {
@@ -90,6 +77,6 @@ android {
 
 androidComponents {
     onVariants { variant ->
-        variant.sources.assets?.addGeneratedSourceDirectory(syncPortAssets, SyncPortAssets::outputDir)
+        variant.sources.assets?.addGeneratedSourceDirectory(syncRuntimeAssets, SyncRuntimeAssets::outputDir)
     }
 }

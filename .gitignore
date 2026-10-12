@@ -13,9 +13,10 @@ android/app/src/main/jniLibs/
 *.jks
 *.keystore
 
-# Visuels du jeu fournis avec le port PortMaster : non utilises, non redistribues ici
-daikatana/cover.png
-daikatana/screenshot.jpg
+# Port PortMaster (moteur Daikatana 1.3, fichiers et visuels du jeu) : non redistribue,
+# l'appli le telecharge depuis PortMaster. Copie locale eventuelle pour les tests.
+/daikatana/
+/Daikatana.sh
 
 # Divers
 .vscode/
