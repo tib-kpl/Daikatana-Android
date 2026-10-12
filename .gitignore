@@ -1,0 +1,22 @@
+# Android / Gradle
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.kotlin/
+
+# Genere : runtime Linux (build-runtime.sh) et proot (prepare-proot.py)
+android/runtime/out/
+android/app/src/main/jniLibs/
+
+# Cle de signature (secret GitHub)
+*.jks
+*.keystore
+
+# Visuels du jeu fournis avec le port PortMaster : non utilises, non redistribues ici
+daikatana/cover.png
+daikatana/screenshot.jpg
+
+# Divers
+.vscode/
+*.log

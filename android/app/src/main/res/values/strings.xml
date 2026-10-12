@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenKatana</string>
+    <string name="app_subtitle">Lanceur non officiel - nécessite les fichiers PC de Daikatana</string>
+    <string name="shortcut_change_folder">Changer le dossier du jeu</string>
+
+    <string name="btn_pick">Choisir le dossier du jeu</string>
+    <string name="btn_grant">Autoriser l\'accès aux fichiers</string>
+    <string name="btn_play">Jouer</string>
+
+    <string name="status_need_permission">OpenKatana a besoin de l\'accès aux fichiers pour lire les données du jeu (pak1.pak, pak2.pak, pak3.pak).</string>
+    <string name="status_no_folder">Fichiers du jeu introuvables.\n\nCopiez le dossier « data » de votre Daikatana (PC/GOG/Steam) sur la console, puis sélectionnez-le.\n\nFichiers requis : %1$s</string>
+    <string name="status_saved_missing">Les fichiers du jeu ne sont plus présents dans :\n%1$s\n\nFichiers manquants : %2$s\n\nSélectionnez à nouveau le dossier du jeu.</string>
+    <string name="status_pick_invalid">Le dossier sélectionné ne contient pas les fichiers du jeu :\n%1$s\n\nFichiers manquants : %2$s\n\nSélectionnez le dossier « data » de Daikatana (ou le dossier qui le contient).</string>
+    <string name="status_pick_unsupported">Ce dossier n\'est pas accessible directement. Choisissez un dossier du stockage interne ou de la carte SD.</string>
+    <string name="status_found">Fichiers du jeu trouvés :\n%1$s</string>
+
+    <string name="game_preparing">Préparation des fichiers du jeu…</string>
+    <string name="game_error">Erreur lors de la préparation : %1$s</string>
+    <string name="game_starting">Démarrage du jeu…</string>
+    <string name="game_exited">Le jeu s\'est arrêté (code %1$d).\n\n%2$s</string>
+    <string name="install_runtime">Installation du runtime Linux… %1$d %%\n(première fois uniquement)</string>
+    <string name="install_port">Installation du moteur…</string>
+</resources>

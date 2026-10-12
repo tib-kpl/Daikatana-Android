@@ -1,0 +1,8 @@
+* text=auto
+*.sh text eol=lf
+android/gradlew text eol=lf
+*.cfg text eol=lf
+*.conf text eol=lf
+*.pak binary
+*.jar binary
+daikatana/daikatana binary

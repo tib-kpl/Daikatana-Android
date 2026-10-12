@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Appui long sur l'icone : changer le dossier des fichiers du jeu -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="change_folder"
+        android:shortcutShortLabel="@string/shortcut_change_folder">
+        <intent
+            android:action="fr.tibkpl.daikatana.CHANGE_FOLDER"
+            android:targetClass="fr.tibkpl.daikatana.LauncherActivity"
+            android:targetPackage="fr.tibkpl.openkatana" />
+    </shortcut>
+</shortcuts>
