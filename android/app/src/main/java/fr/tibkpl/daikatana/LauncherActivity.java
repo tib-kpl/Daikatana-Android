@@ -28,6 +28,7 @@ public class LauncherActivity extends Activity {
     private TextView status;
     private Button pickButton;
     private Button playButton;
+    private Button languageButton;
 
     /** Vrai quand on vient du raccourci "Changer le dossier" : pas de lancement auto. */
     private boolean forcePick;
@@ -41,6 +42,9 @@ public class LauncherActivity extends Activity {
         status = findViewById(R.id.status);
         pickButton = findViewById(R.id.pick);
         playButton = findViewById(R.id.play);
+        languageButton = findViewById(R.id.language);
+        languageButton.setOnClickListener(v -> cycleLanguage());
+        updateLanguageButton();
         forcePick = ACTION_CHANGE_FOLDER.equals(getIntent().getAction());
     }
 
@@ -90,6 +94,18 @@ public class LauncherActivity extends Activity {
             playButton.setVisibility(Button.GONE);
             pickButton.requestFocus();
         }
+    }
+
+    /** Langue suivante du jeu (menus et textes traduits par libdkbridge.so). */
+    private void cycleLanguage() {
+        String current = GameData.getLanguage(this);
+        int i = java.util.Arrays.asList(GameData.LANGUAGES).indexOf(current);
+        GameData.saveLanguage(this, GameData.LANGUAGES[(i + 1) % GameData.LANGUAGES.length]);
+        updateLanguageButton();
+    }
+
+    private void updateLanguageButton() {
+        languageButton.setText(getString(R.string.btn_language, GameData.languageName(GameData.getLanguage(this))));
     }
 
     private void launchGame(File dataDir) {

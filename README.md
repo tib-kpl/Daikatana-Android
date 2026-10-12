@@ -1,164 +1,162 @@
 # OpenKatana
 
-Lanceur Android **non officiel** pour jouer à **Daikatana** (Ion Storm, 2000) sur les
-consoles portables et smartphones Android ARM64, grâce au moteur du patch communautaire
-**Daikatana 1.3** dans son port PortMaster.
+**Unofficial** Android launcher to play **Daikatana** (Ion Storm, 2000) on ARM64 Android
+handhelds and phones, using the engine of the community **Daikatana 1.3** patch, through its
+PortMaster port.
 
 > [!IMPORTANT]
-> **Vous devez posséder le jeu.** OpenKatana ne contient **aucun fichier du jeu** : ni
-> niveaux, ni textures, ni sons, ni musiques. Il ne contient pas non plus le moteur
-> Daikatana 1.3. Pour jouer, il vous faut une copie légale de
-> Daikatana pour PC (par exemple [GOG](https://www.gog.com/game/daikatana) ou
-> [Steam](https://store.steampowered.com/app/242980/Daikatana/)) et copier son dossier
-> `data` sur l'appareil. Sans ces fichiers, l'application refuse de lancer le jeu.
+> **You must own the game.** OpenKatana contains **no game files**: no levels, textures,
+> sounds or music. It does not contain the Daikatana 1.3 engine either. To play, you need a
+> legal copy of Daikatana for PC (for example from [GOG](https://www.gog.com/game/daikatana)
+> or [Steam](https://store.steampowered.com/app/242980/Daikatana/)), and you must copy its
+> `data` folder to your device. Without these files, the app will not start the game.
 
-## Fonctionnalités
+## Features
 
-- Vérifie au démarrage la présence des fichiers du jeu (`pak1.pak`, `pak2.pak`, `pak3.pak`).
-  S'ils manquent, demande où ils se trouvent (mémoire interne ou carte SD) et retient le
-  chemin.
-- Écran large : plein écran 16:9 (ou au format de l'écran), FOV adapté, zone de l'encoche
-  utilisée.
-- Manette intégrée ou Bluetooth (sticks, gâchettes, croix), clavier physique.
-- Son (OpenAL).
-- Aucune émulation : le moteur ARM64 tourne en natif.
+- Checks for the game files (`pak1.pak`, `pak2.pak`, `pak3.pak`) at startup. If they are
+  missing, it asks where they are (internal storage or SD card) and remembers the location.
+- Widescreen: 16:9 fullscreen (or the screen's aspect ratio), widescreen FOV, display cutout
+  area used.
+- Built-in or Bluetooth gamepad (sticks, analog triggers, d-pad), physical keyboard.
+- Game languages: English, French, German, Italian and Spanish.
+- Sound (OpenAL). The game pauses and goes silent when the app is in the background or the
+  screen is locked.
+- No emulation: the ARM64 engine runs natively.
 
-Testé sur **AYN Odin 2 Portal** (Snapdragon 8 Gen 2, Android 13).
+Tested on the **AYN Odin 2 Portal** (Snapdragon 8 Gen 2, Android 13).
 
 ## Installation
 
-1. Téléchargez `OpenKatana-x.y.z.apk` depuis la page
-   [Releases](../../releases) et installez-le (autorisez l'installation d'applications
-   inconnues).
-2. Copiez le dossier `data` de votre installation PC de Daikatana sur l'appareil, par exemple
-   dans `ROMS/PC/Daikatana/data` sur la carte SD. Une installation patchée en 1.3 sous Windows
-   convient aussi : les fichiers supplémentaires (`pak4.pak` à `pak6.pak`, voix…) sont
-   utilisés.
-3. Lancez **OpenKatana** :
-   - autorisez l'**accès à tous les fichiers** : le moteur lit les fichiers du jeu à leur
-     emplacement, sans les copier ;
-   - choisissez le dossier `data`, ou le dossier qui le contient.
-4. Au premier lancement, OpenKatana installe son runtime Linux et **télécharge le moteur**
-   (port Daikatana de PortMaster, 14 Mo) depuis la source officielle de PortMaster. Une
-   connexion Internet est donc nécessaire la première fois, puis le jeu démarre. Aux
-   lancements suivants, le jeu démarre directement, sans connexion.
+1. Download `OpenKatana-x.y.z.apk` from the [Releases](../../releases) page and install it
+   (allow installing apps from unknown sources).
+2. Copy the `data` folder of your PC Daikatana installation to the device, for example to
+   `ROMS/PC/Daikatana/data` on the SD card. A Windows installation patched to 1.3 works too;
+   its extra files (`pak4.pak` to `pak6.pak`, voice packs…) are used.
+3. Start **OpenKatana**:
+   - grant **all files access**: the engine reads the game files where they are, without
+     copying them;
+   - pick the `data` folder (or the folder that contains it);
+   - optionally, choose the game language.
+4. On first launch, OpenKatana installs its Linux runtime and **downloads the engine** (the
+   PortMaster Daikatana port, 14 MB) from PortMaster's official source. For a language other
+   than English, it also downloads the official language modules of the 1.3 patch (22 MB)
+   from its GitHub releases. An Internet connection is required that first time only.
 
-Pour changer de dossier plus tard : **appui long sur l'icône → « Changer le dossier du jeu »**.
+To change the game folder later: **long-press the icon → "Changer le dossier du jeu"**.
 
-### Commandes (manette)
+### Gamepad controls
 
-Les commandes sont celles du port PortMaster (`daikatana/cfgs/gamecontroller.cfg`) et se
-modifient dans le menu du jeu.
+OpenKatana uses a classic FPS layout. It is applied at every launch, like the port's
+`gamecontroller.cfg`.
 
-| Bouton | Action |
+| Button | Action |
 |---|---|
-| Stick gauche / droit | Se déplacer / viser |
-| R2 | Tirer |
+| Left / right stick | Move / aim |
+| R2 | Fire |
 | L2 | Zoom |
-| A | S'accroupir |
-| B | Utiliser l'objet sélectionné |
-| X | Utiliser (portes, boutons) |
-| Y | Changer d'objet du HUD |
-| L1 / R1 | Sauter / courir |
-| Croix gauche / droite | Arme précédente / suivante |
-| Croix haut / bas | Objet précédent / suivant |
+| A | Jump |
+| B | Crouch |
+| X | Use (doors, switches) |
+| Y | Cycle HUD item |
+| L1 | Use selected item |
+| R1 | Run |
+| D-pad left / right | Previous / next weapon |
+| D-pad up / down | Previous / next item |
 | Start | Menu |
-| Retour (Android) | Échap |
+| Back (Android) | Escape |
 
-## Limites actuelles
+## Current limitations
 
-- **Rendu logiciel** (Mesa llvmpipe), en 1280x720 agrandi au format de l'écran. C'est
-  jouable sur un Snapdragon 8 Gen 2, mais pas encore fluide en toutes circonstances.
-  L'accélération GPU Adreno (Mesa Turnip + Zink) est prévue.
-- **Menus en anglais uniquement** : le moteur ARM64 du port ne charge pas encore les modules
-  de langue du patch 1.3 (travail en cours, voir `android/runtime/langconv.py`).
-- Uniquement les appareils **ARM64** (arm64-v8a), Android 8.0 ou plus récent.
+- **Software rendering** (Mesa llvmpipe), at 1280x720 scaled to the screen. Playable on a
+  Snapdragon 8 Gen 2, but not always smooth. Adreno GPU acceleration (Mesa Turnip + Zink) is
+  being worked on.
+- A few texts that only exist in the 2023 engine of the port stay in English.
+- **ARM64** devices only (arm64-v8a), Android 8.0 or newer.
 
-## Fonctionnement
+## How it works
 
-Le moteur est le port PortMaster de Daikatana 1.3, téléchargé depuis
-[PortMaster](https://github.com/PortsMaster/PortMaster-New) au premier lancement (MD5
-vérifié). C'est un exécutable **Linux** ARM64 (glibc, SDL2, OpenAL), qu'Android ne peut pas
-lancer directement. OpenKatana fournit donc un petit environnement Linux, comme le
-fait PortMaster sur les consoles Linux :
+The engine is the PortMaster port of Daikatana 1.3, downloaded from
+[PortMaster](https://github.com/PortsMaster/PortMaster-New) on first launch (MD5 checked).
+It is a **Linux** ARM64 executable (glibc, SDL2, OpenAL) that Android cannot run directly, so
+OpenKatana provides a small Linux environment, like PortMaster does on Linux handhelds:
 
 ```
-Appli Android (Java)
- ├─ proot ─► Debian arm64 minimal ─► Xvfb (écran X virtuel) ─► moteur Daikatana
- │                                     └─ libdkbridge.so (LD_PRELOAD) : manette SDL virtuelle
- ├─ affiche l'image de Xvfb (mmap) avec OpenGL ES, mise à l'échelle de l'écran
- ├─ envoie manette/clavier à libdkbridge (socket locale)
- └─ joue le son : OpenAL → ALSA → FIFO → AudioTrack
+Android app (Java)
+ ├─ proot ─► minimal Debian arm64 ─► Xvfb (virtual X screen) ─► Daikatana engine
+ │                                     └─ libdkbridge.so (LD_PRELOAD): virtual SDL gamepad,
+ │                                        pause, translation of the engine's texts
+ ├─ shows the Xvfb framebuffer (mmap) with OpenGL ES, scaled to the screen
+ ├─ sends gamepad/keyboard input to libdkbridge (local socket)
+ └─ plays the sound: OpenAL → ALSA → FIFO → AudioTrack
 ```
 
-## Structure du dépôt
+The port's engine has English built in and does not load the 1.3 language modules. For other
+languages, `libdkbridge.so` reads the official `language_english.so` and `language_<lang>.so`
+modules as data, and replaces each English text of the engine with its translation before the
+game starts.
 
-| Chemin | Contenu |
+## Repository layout
+
+| Path | Content |
 |---|---|
-| `android/app/` | Application Android |
-| `android/runtime/` | Construction du runtime Linux : rootfs, pont manette, son, proot |
-| `.github/workflows/release.yml` | Construction et publication de l'APK |
+| `android/app/` | Android app |
+| `android/runtime/` | Linux runtime build: rootfs, bridge library, sound, proot |
+| `.github/workflows/release.yml` | APK build and release |
 
-## Compilation
+## Building
 
-### Avec GitHub Actions
+### With GitHub Actions
 
-Poussez un tag pour produire une release avec l'APK :
+Every push to `main` builds the APK and publishes it as a new release (version
+`0.3.<build number>`). The workflow can also be started manually from the *Actions* tab.
 
-```sh
-git tag v0.3.0
-git push origin v0.3.0
-```
+It only uses `ubuntu-latest` runners, which are included in GitHub's free quota, private
+repositories included. The ARM64 runtime is built under QEMU emulation; a full release takes
+about 5 to 10 minutes.
 
-Le workflow peut aussi être lancé à la main (onglet *Actions*). L'APK est alors disponible en
-artefact pendant 1 jour.
-
-Il n'utilise que des runners `ubuntu-latest`, inclus dans le quota gratuit de GitHub, y
-compris pour un dépôt privé. Le runtime ARM64 y est construit sous émulation, ce qui prend
-environ 20 à 30 minutes par release.
-
-**Signature** : pour que les mises à jour s'installent par-dessus la version précédente,
-l'APK doit toujours être signé avec la même clé. Créez-la une fois :
+**Signing**: for updates to install over the previous version, the APK must always be signed
+with the same key. Create it once:
 
 ```sh
 keytool -genkeypair -v -keystore release.jks -alias openkatana -keyalg RSA -keysize 4096 -validity 10000
-base64 -w0 release.jks   # valeur du secret OPENKATANA_KEYSTORE_BASE64
+base64 -w0 release.jks   # value of the OPENKATANA_KEYSTORE_BASE64 secret
 ```
 
-Puis ajoutez ces secrets au dépôt (*Settings → Secrets and variables → Actions*) :
+Then add these repository secrets (*Settings → Secrets and variables → Actions*):
 `OPENKATANA_KEYSTORE_BASE64`, `OPENKATANA_KEYSTORE_PASSWORD`, `OPENKATANA_KEY_ALIAS`
-(`openkatana`) et `OPENKATANA_KEY_PASSWORD`. Sans ces secrets, l'APK est signé avec une clé
-de debug. Gardez `release.jks` en lieu sûr et ne le commitez pas.
+(`openkatana`) and `OPENKATANA_KEY_PASSWORD`. Without them, the APK is signed with a debug
+key. Keep `release.jks` safe and never commit it.
 
-### En local
+### Locally
 
-Prérequis : JDK 17+, SDK Android (plateforme 36), Python 3, Docker (avec émulation ARM64 sur
-un PC x86_64). Aucun fichier du jeu ni du moteur n'est nécessaire pour compiler.
+Requirements: JDK 17+, Android SDK (platform 36), Python 3, Docker (with ARM64 emulation on an
+x86_64 PC). No game or engine file is needed to build.
 
 ```sh
-# 1. Runtime Linux arm64 -> android/runtime/out/rootfs.tgz
+# 1. ARM64 Linux runtime -> android/runtime/out/rootfs.tgz
 docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie sh /src/android/runtime/build-runtime.sh
 
-# 2. proot (paquets Termux) -> android/app/src/main/jniLibs/arm64-v8a/
+# 2. proot (Termux packages) -> android/app/src/main/jniLibs/arm64-v8a/
 python3 android/runtime/prepare-proot.py
 
 # 3. APK
 cd android && ./gradlew assembleRelease
 ```
 
-`android/runtime/devtools/` contient des outils pour tester le runtime directement sur un
-appareil via adb, hors de l'application.
+`android/runtime/devtools/` contains tools to test the runtime directly on a device through
+adb, outside of the app.
 
-## Crédits et licences
+## Credits and licenses
 
-- **Daikatana** © Ion Storm / Eidos Interactive (Square Enix). Marques et contenus du jeu
-  appartiennent à leurs propriétaires. Ce projet n'est **ni affilié ni approuvé** par eux.
-- **Daikatana 1.3** : patch communautaire de Frank Sapone (maraakate) et de son équipe,
-  https://github.com/maraakate/daikatana.
-- **Port PortMaster** : JohnnyonFlame, https://portmaster.games. Il n'est pas redistribué
-  par ce projet : l'application le télécharge depuis PortMaster.
-- **proot** (GPL-2.0) et **libtalloc** (LGPL-3.0) : paquets [Termux](https://termux.dev).
-- **Runtime Linux** : paquets [Debian](https://www.debian.org) 13 (SDL2, OpenAL Soft,
-  Mesa, Xorg Xvfb, glibc…), chacun sous sa propre licence.
-- Détail des licences et accès aux sources : [THIRD_PARTY.md](THIRD_PARTY.md).
-- Icône et illustration d'OpenKatana : créations originales du projet.
+- **Daikatana** © Ion Storm / Eidos Interactive (Square Enix). The game's trademarks and
+  content belong to their owners. This project is **neither affiliated with nor endorsed** by
+  them.
+- **Daikatana 1.3**: community patch by Frank Sapone (maraakate) and team,
+  https://github.com/maraakate/daikatana. Its engine and language modules are not
+  redistributed by this project: the app downloads them from their official sources.
+- **PortMaster port**: JohnnyonFlame, https://portmaster.games.
+- **proot** (GPL-2.0) and **libtalloc** (LGPL-3.0): [Termux](https://termux.dev) packages.
+- **Linux runtime**: [Debian](https://www.debian.org) 13 packages (SDL2, OpenAL Soft, Mesa,
+  X.Org Xvfb, glibc…), each under its own license.
+- License details and source code access: [THIRD_PARTY.md](THIRD_PARTY.md).
+- OpenKatana's icon and artwork are original creations of this project.

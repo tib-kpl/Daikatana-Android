@@ -9,6 +9,8 @@
  *   type 1 = bouton manette (code = SDL_GameControllerButton, valeur 0/1)
  *   type 2 = axe manette    (code = SDL_GameControllerAxis, valeur -32768..32767)
  *   type 3 = touche clavier (code = SDL_Scancode, valeur 0/1)
+ *   type 4 = pause (valeur 1) / reprise (valeur 0) : appli en arriere-plan ou ecran verrouille.
+ *            La boucle du jeu est bloquee a la fin de l'image en cours.
  */
 #define _GNU_SOURCE
 #include <SDL2/SDL.h>
@@ -27,12 +29,16 @@
 #define MSG_BUTTON 1
 #define MSG_AXIS   2
 #define MSG_KEY    3
+#define MSG_PAUSE  4
 
 #define ATTACH_AFTER_FRAMES 30
 
 static SDL_Joystick *volatile virtual_joy;
 static int started;
 static int frames;
+static int paused;
+static pthread_mutex_t pause_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t pause_cond = PTHREAD_COND_INITIALIZER;
 
 static int read_full(int fd, void *buf, size_t len)
 {
@@ -58,6 +64,24 @@ static void push_key(SDL_Scancode scancode, int down)
     SDL_PushEvent(&ev);
 }
 
+void dklang_frame(void); /* dklang.c */
+
+static void set_paused(int value)
+{
+    pthread_mutex_lock(&pause_lock);
+    paused = value ? 1 : 0;
+    pthread_cond_broadcast(&pause_cond);
+    pthread_mutex_unlock(&pause_lock);
+}
+
+/* Appele par le thread du jeu apres chaque image : attend tant que l'appli est en pause. */
+static void wait_while_paused(void)
+{
+    pthread_mutex_lock(&pause_lock);
+    while (paused) pthread_cond_wait(&pause_cond, &pause_lock);
+    pthread_mutex_unlock(&pause_lock);
+}
+
 static void handle(uint8_t type, uint16_t code, int32_t value)
 {
     switch (type) {
@@ -69,6 +93,9 @@ static void handle(uint8_t type, uint16_t code, int32_t value)
         break;
     case MSG_KEY:
         push_key((SDL_Scancode)code, value);
+        break;
+    case MSG_PAUSE:
+        set_paused(value);
         break;
     }
 }
@@ -100,6 +127,7 @@ static void *input_thread(void *arg)
             }
         }
         if (fd >= 0) close(fd);
+        set_paused(0); /* appli deconnectee : ne jamais rester bloque */
         usleep(200 * 1000);
     }
     return NULL;
@@ -168,6 +196,8 @@ void SDL_GL_SwapWindow(SDL_Window *window)
     static void (*real_swap)(SDL_Window *);
     if (!real_swap) real_swap = (void (*)(SDL_Window *))dlsym(RTLD_NEXT, "SDL_GL_SwapWindow");
     real_swap(window);
+    dklang_frame();
+    wait_while_paused();
     if (++frames == ATTACH_AFTER_FRAMES) attach_virtual_controller();
     if (getenv("DK_DEBUG") && frames % 100 == 0) {
         fprintf(stderr, "dkbridge: image %d, t=%u ms\n", frames, SDL_GetTicks());

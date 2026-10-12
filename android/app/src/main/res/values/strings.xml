@@ -7,6 +7,7 @@
     <string name="btn_pick">Choisir le dossier du jeu</string>
     <string name="btn_grant">Autoriser l\'accès aux fichiers</string>
     <string name="btn_play">Jouer</string>
+    <string name="btn_language">Langue du jeu : %1$s</string>
 
     <string name="status_need_permission">OpenKatana a besoin de l\'accès aux fichiers pour lire les données du jeu (pak1.pak, pak2.pak, pak3.pak).</string>
     <string name="status_no_folder">Fichiers du jeu introuvables.\n\nCopiez le dossier « data » de votre Daikatana (PC/GOG/Steam) sur la console, puis sélectionnez-le.\n\nFichiers requis : %1$s</string>
@@ -20,6 +21,8 @@
     <string name="game_starting">Démarrage du jeu…</string>
     <string name="game_exited">Le jeu s\'est arrêté (code %1$d).\n\n%2$s</string>
     <string name="install_runtime">Installation du runtime Linux… %1$d %%\n(première fois uniquement)</string>
+    <string name="install_language">Téléchargement des langues du patch 1.3… %1$d %%
+(une seule fois)</string>
     <string name="install_port">Téléchargement du moteur depuis PortMaster… %1$d %%
 (première fois uniquement, connexion Internet requise)</string>
 </resources>

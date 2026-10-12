@@ -26,6 +26,8 @@ final class AudioBridge {
 
     private final File fifo;
     private volatile boolean running = true;
+    private boolean paused;
+    private AudioTrack track;
     private Thread thread;
 
     AudioBridge(File fifo) {
@@ -42,6 +44,23 @@ final class AudioBridge {
         }
         thread = new Thread(this::run, "daikatana-audio");
         thread.start();
+    }
+
+    /**
+     * Coupe le son (appli en arriere-plan) : AudioTrack en pause et FIFO plus lu, ce qui
+     * bloque aussi le mixage OpenAL du jeu.
+     */
+    synchronized void setPaused(boolean value) {
+        paused = value;
+        if (track != null) {
+            if (value) track.pause();
+            else track.play();
+        }
+        notifyAll();
+    }
+
+    private synchronized void waitWhilePaused() throws InterruptedException {
+        while (paused && running) wait();
     }
 
     void stop() {
@@ -72,7 +91,10 @@ final class AudioBridge {
                 .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
                 .setTransferMode(AudioTrack.MODE_STREAM)
                 .build();
-        track.play();
+        synchronized (this) {
+            this.track = track;
+            if (!paused) track.play();
+        }
         byte[] buffer = new byte[3840]; // 20 ms
         try {
             while (running) {
@@ -86,7 +108,9 @@ final class AudioBridge {
                     // N'ecrit que des trames completes (4 octets) ; le reste attend la lecture suivante
                     int filled = 0;
                     int n;
-                    while (running && (n = in.read(buffer, filled, buffer.length - filled)) > 0) {
+                    while (running) {
+                        waitWhilePaused();
+                        if ((n = in.read(buffer, filled, buffer.length - filled)) <= 0) break;
                         filled += n;
                         int frames = filled & ~3;
                         track.write(buffer, 0, frames);
@@ -95,9 +119,15 @@ final class AudioBridge {
                     }
                 } catch (IOException e) {
                     if (running) Log.w(TAG, "Audio : " + e.getMessage());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
                 }
             }
         } finally {
+            synchronized (this) {
+                this.track = null;
+            }
             track.stop();
             track.release();
         }

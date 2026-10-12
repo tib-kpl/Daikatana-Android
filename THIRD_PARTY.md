@@ -1,36 +1,37 @@
-# Logiciels tiers
+# Third-party software
 
-OpenKatana redistribue, dans son APK, les logiciels libres suivants sous forme binaire.
-Leur code source est disponible aux adresses indiquées.
+OpenKatana redistributes the following free software in binary form inside its APK. Their
+source code is available at the addresses below.
 
 ## proot
 
-- Licence : GPL-2.0-or-later
-- Binaires : paquets Termux `proot`, `libtalloc` (LGPL-3.0-or-later) et `libandroid-shmem`
-  (BSD-3-Clause), téléchargés par `android/runtime/prepare-proot.py` depuis
+- License: GPL-2.0-or-later
+- Binaries: Termux packages `proot`, `libtalloc` (LGPL-3.0-or-later) and `libandroid-shmem`
+  (BSD-3-Clause), downloaded by `android/runtime/prepare-proot.py` from
   https://packages.termux.dev
-- Sources : https://github.com/termux/proot et https://github.com/termux/termux-packages
-  (recettes de compilation `packages/proot`, `packages/libtalloc`, `packages/libandroid-shmem`)
+- Sources: https://github.com/termux/proot and https://github.com/termux/termux-packages
+  (build recipes `packages/proot`, `packages/libtalloc`, `packages/libandroid-shmem`)
 
-## Runtime Linux (paquets Debian 13 « trixie », arm64)
+## Linux runtime (Debian 13 "trixie" arm64 packages)
 
-Le rootfs embarqué (`assets/runtime/rootfs.tgz`) ne contient que des fichiers de paquets
-Debian non modifiés, plus les fichiers propres à OpenKatana sous `/opt/dk` et `/etc/asound.conf`.
-Les principaux composants sont glibc, SDL2, OpenAL Soft, Mesa, le serveur Xvfb de X.Org,
-libvorbis et dash.
+The bundled rootfs (`assets/runtime/rootfs.tgz`) only contains files from unmodified Debian
+packages, plus OpenKatana's own files under `/opt/dk` and `/etc/asound.conf`. Its main
+components are glibc, SDL2, OpenAL Soft, Mesa, the X.Org Xvfb server, libvorbis and dash.
 
-- Liste exacte des paquets et de leurs versions : `packages.txt`, joint à chaque release et
-  présent dans le rootfs (`/usr/share/doc/openkatana/packages.txt`).
-- Licences : fichiers `copyright` de chaque paquet, inclus dans le rootfs
-  (`/usr/share/doc/<paquet>/copyright`).
-- Sources : https://sources.debian.org, et https://snapshot.debian.org pour une version précise
-  (`apt-get source <paquet>=<version>`).
+- Exact list of packages and versions: `packages.txt`, attached to every release and included
+  in the rootfs (`/usr/share/doc/openkatana/packages.txt`).
+- Licenses: each package's `copyright` file, included in the rootfs
+  (`/usr/share/doc/<package>/copyright`).
+- Sources: https://sources.debian.org, or https://snapshot.debian.org for an exact version
+  (`apt-get source <package>=<version>`).
 
-## Non redistribué
+## Not redistributed
 
-- **Fichiers du jeu Daikatana** (© Ion Storm / Eidos Interactive) : fournis par l'utilisateur,
-  qui doit posséder le jeu.
-- **Moteur Daikatana 1.3** (port PortMaster de JohnnyonFlame) : téléchargé par l'application
-  sur l'appareil, depuis la source officielle de PortMaster
-  (https://github.com/PortsMaster/PortMaster-New), au premier lancement. Son empreinte MD5
-  est vérifiée.
+- **Daikatana game files** (© Ion Storm / Eidos Interactive): provided by the user, who must
+  own the game.
+- **Daikatana 1.3 engine** (PortMaster port by JohnnyonFlame): downloaded by the app on the
+  device, from PortMaster's official source (https://github.com/PortsMaster/PortMaster-New),
+  on first launch. Its MD5 checksum is verified.
+- **Daikatana 1.3 language modules**: downloaded by the app on the device from the official
+  1.3 release (https://github.com/maraakate/daikatana/releases) when a language other than
+  English is selected. Their SHA-256 checksum is verified. They are only read as data.

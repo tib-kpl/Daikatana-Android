@@ -22,6 +22,7 @@ final class InputBridge {
     private static final int MSG_BUTTON = 1;
     private static final int MSG_AXIS = 2;
     private static final int MSG_KEY = 3;
+    private static final int MSG_PAUSE = 4;
 
     // SDL_GameControllerButton
     private static final int BTN_A = 0, BTN_B = 1, BTN_X = 2, BTN_Y = 3, BTN_BACK = 4, BTN_GUIDE = 5,
@@ -90,8 +91,13 @@ final class InputBridge {
     private final ServerSocket server;
     private final BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
     private volatile boolean closed;
+    private volatile byte[] lastPause;
     private final int[] axes = new int[6];
     private int hatX;
+    private boolean triggerKeys; // la manette envoie des touches L2/R2
+    private final boolean[] triggers = new boolean[2];
+    private static final int SCANCODE_LCTRL = 224;
+    private static final int SCANCODE_LALT = 226;
     private int hatY;
 
     InputBridge() throws IOException {
@@ -113,7 +119,9 @@ final class InputBridge {
             try (Socket socket = server.accept()) {
                 socket.setTcpNoDelay(true);
                 OutputStream out = socket.getOutputStream();
+                byte[] pending = lastPause;
                 queue.clear();
+                if (pending != null) queue.offer(pending); // etat de pause courant
                 while (!closed) {
                     out.write(queue.take());
                     out.flush();
@@ -135,6 +143,11 @@ final class InputBridge {
         }
     }
 
+    /** Fige (true) ou relance (false) la boucle du jeu. */
+    void setPaused(boolean paused) {
+        send(MSG_PAUSE, 0, paused ? 1 : 0);
+    }
+
     /** @return true si la touche a ete transmise au jeu. */
     boolean onKey(KeyEvent event) {
         int action = event.getAction();
@@ -144,12 +157,13 @@ final class InputBridge {
         int keyCode = event.getKeyCode();
         boolean fromGamepad = isGamepad(event.getSource());
 
-        if (keyCode == KeyEvent.KEYCODE_BUTTON_L2) {
-            send(MSG_AXIS, AXIS_LTRIGGER, down ? 32767 : 0);
-            return true;
-        }
-        if (keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
-            send(MSG_AXIS, AXIS_RTRIGGER, down ? 32767 : 0);
+        // Gachettes : envoyees comme touches clavier (R2 = Ctrl, L2 = Alt, liees a +attack et
+        // +zoom par autoexec.cfg). Le moteur gere mal les gachettes de manette (tir qui ne
+        // s'arrete plus). Si la manette envoie des touches L2/R2 (comme l'Odin), elles font
+        // foi et l'axe analogique est ignore.
+        if (keyCode == KeyEvent.KEYCODE_BUTTON_L2 || keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
+            triggerKeys = true;
+            setTrigger(keyCode == KeyEvent.KEYCODE_BUTTON_R2 ? 1 : 0, down);
             return true;
         }
         int button = BUTTONS.get(keyCode, -1);
@@ -172,10 +186,12 @@ final class InputBridge {
         axis(event, AXIS_LY, MotionEvent.AXIS_Y, false);
         axis(event, AXIS_RX, MotionEvent.AXIS_Z, false);
         axis(event, AXIS_RY, MotionEvent.AXIS_RZ, false);
-        float lt = Math.max(event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE));
-        float rt = Math.max(event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS));
-        setAxis(AXIS_LTRIGGER, Math.round(lt * 32767));
-        setAxis(AXIS_RTRIGGER, Math.round(rt * 32767));
+        if (!triggerKeys) {
+            float lt = Math.max(event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE));
+            float rt = Math.max(event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS));
+            analogTrigger(0, lt);
+            analogTrigger(1, rt);
+        }
 
         int newHatX = Math.round(event.getAxisValue(MotionEvent.AXIS_HAT_X));
         int newHatY = Math.round(event.getAxisValue(MotionEvent.AXIS_HAT_Y));
@@ -205,6 +221,19 @@ final class InputBridge {
         setAxis(sdlAxis, Math.max(-32768, Math.min(32767, Math.round(v * 32767))));
     }
 
+    /** Gachette analogique -> appui franc, avec hysteresis (enfoncee > 50 %, relachee < 25 %). */
+    private void analogTrigger(int trigger, float value) {
+        if (!triggers[trigger] && value > 0.5f) setTrigger(trigger, true);
+        else if (triggers[trigger] && value < 0.25f) setTrigger(trigger, false);
+    }
+
+    /** trigger 0 = L2 (Alt gauche), 1 = R2 (Ctrl gauche). */
+    private void setTrigger(int trigger, boolean pressed) {
+        if (triggers[trigger] == pressed) return;
+        triggers[trigger] = pressed;
+        send(MSG_KEY, trigger == 1 ? SCANCODE_LCTRL : SCANCODE_LALT, pressed ? 1 : 0);
+    }
+
     private void setAxis(int sdlAxis, int value) {
         if (axes[sdlAxis] == value) return;
         axes[sdlAxis] = value;
@@ -222,10 +251,16 @@ final class InputBridge {
                 || keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
     }
 
+    /** Journal des entrees envoyees au jeu (version de debug uniquement). */
+    static boolean debug;
+
     private void send(int type, int code, int value) {
-        queue.offer(new byte[]{
+        if (debug) android.util.Log.d("OpenKatanaInput", "type=" + type + " code=" + code + " value=" + value);
+        byte[] msg = {
                 (byte) type, 0, (byte) code, (byte) (code >> 8),
                 (byte) value, (byte) (value >> 8), (byte) (value >> 16), (byte) (value >> 24),
-        });
+        };
+        if (type == MSG_PAUSE) lastPause = msg;
+        queue.offer(msg);
     }
 }

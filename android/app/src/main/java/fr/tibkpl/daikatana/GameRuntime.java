@@ -73,6 +73,8 @@ final class GameRuntime {
         cmd.add("DK_WIDTH=" + width);
         cmd.add("DK_HEIGHT=" + height);
         cmd.add("DK_INPUT_PORT=" + inputPort);
+        cmd.add("DK_LANGUAGE=" + config.language);
+        cmd.add("DK_LANG_DIR=/game/lang");
         cmd.add("/bin/sh");
         cmd.add("/opt/dk/run.sh");
 

@@ -24,6 +24,11 @@ final class GameData {
 
     private static final String PREFS = "daikatana";
     private static final String KEY_DATA_PATH = "data_path";
+    private static final String KEY_LANGUAGE = "language";
+
+    /** Langues du patch 1.3 : code du module (language_<code>.so) et nom affiche. */
+    static final String[] LANGUAGES = {"english", "french", "german", "italian", "spanish"};
+    static final String[] LANGUAGE_NAMES = {"English", "Français", "Deutsch", "Italiano", "Español"};
 
     private GameData() {}
 
@@ -33,6 +38,29 @@ final class GameData {
 
     static void savePath(Context context, File dir) {
         prefs(context).edit().putString(KEY_DATA_PATH, dir.getAbsolutePath()).apply();
+    }
+
+    /** Langue du jeu choisie, ou a defaut celle de l'appareil si le jeu la propose. */
+    static String getLanguage(Context context) {
+        String saved = prefs(context).getString(KEY_LANGUAGE, null);
+        if (saved != null) return saved;
+        String device = Locale.getDefault().getLanguage();
+        String[] isoCodes = {"en", "fr", "de", "it", "es"};
+        for (int i = 0; i < isoCodes.length; i++) {
+            if (isoCodes[i].equals(device)) return LANGUAGES[i];
+        }
+        return "english";
+    }
+
+    static void saveLanguage(Context context, String language) {
+        prefs(context).edit().putString(KEY_LANGUAGE, language).apply();
+    }
+
+    static String languageName(String language) {
+        for (int i = 0; i < LANGUAGES.length; i++) {
+            if (LANGUAGES[i].equals(language)) return LANGUAGE_NAMES[i];
+        }
+        return language;
     }
 
     private static SharedPreferences prefs(Context context) {

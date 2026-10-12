@@ -1,14 +1,17 @@
 name: Release APK
 
-# Publie une release GitHub avec l'APK quand un tag vX.Y.Z est pousse.
+# Chaque push sur main publie une release GitHub avec l'APK (version 0.3.<numero du build>).
+# Lancement manuel possible (Actions > Release APK > Run workflow), avec la meme publication.
 # Uniquement des runners ubuntu-latest (inclus dans le quota gratuit, y compris en prive) ;
 # le runtime arm64 est construit sous emulation QEMU.
-# Lancement manuel possible (Actions > Release APK > Run workflow) : l'APK est alors
-# disponible en artefact du workflow, sans release.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -18,7 +21,7 @@ jobs:
     name: Runtime Linux arm64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Emulation arm64
         uses: docker/setup-qemu-action@v3
@@ -30,7 +33,7 @@ jobs:
           docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie \
             sh /src/android/runtime/build-runtime.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: rootfs
           path: |
@@ -46,14 +49,14 @@ jobs:
       run:
         working-directory: android
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: rootfs
           path: android/runtime/out
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -81,13 +84,10 @@ jobs:
 
       - name: Version
         run: |
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            NAME="${GITHUB_REF_NAME#v}"
-          else
-            NAME="0.0.0-${GITHUB_SHA::7}"
-          fi
+          NAME="0.3.${GITHUB_RUN_NUMBER}"
           echo "OPENKATANA_VERSION_NAME=$NAME" >> "$GITHUB_ENV"
           echo "OPENKATANA_VERSION_CODE=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=v$NAME" >> "$GITHUB_ENV"
           echo "APK_NAME=OpenKatana-$NAME.apk" >> "$GITHUB_ENV"
 
       - name: Compilation
@@ -100,16 +100,18 @@ jobs:
           ./gradlew assembleRelease --no-daemon
           mv app/build/outputs/apk/release/app-release.apk "$APK_NAME"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: apk
           path: android/${{ env.APK_NAME }}
           retention-days: 1 # l'APK durable est celle attachee a la release
 
       - name: Release GitHub
-        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: OpenKatana ${{ env.OPENKATANA_VERSION_NAME }}
+          target_commitish: ${{ github.sha }}
           files: |
             android/${{ env.APK_NAME }}
             android/runtime/out/packages.txt

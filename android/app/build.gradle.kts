@@ -75,6 +75,11 @@ android {
     }
 }
 
+dependencies {
+    // Lecture de la release Linux du patch 1.3 (.tar.bz2) pour les modules de langue
+    implementation("org.apache.commons:commons-compress:1.27.1")
+}
+
 androidComponents {
     onVariants { variant ->
         variant.sources.assets?.addGeneratedSourceDirectory(syncRuntimeAssets, SyncRuntimeAssets::outputDir)

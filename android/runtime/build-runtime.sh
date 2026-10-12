@@ -19,7 +19,8 @@ apt-get install -y -q --no-install-recommends \
 # 2. Fichiers propres au runtime (run.sh, asound.conf) et pont manette (LD_PRELOAD)
 cp -r "$RUNTIME/rootfs-overlay/." /
 chmod 755 /opt/dk/run.sh
-gcc -O2 -shared -fPIC -Wall -o /opt/dk/libdkbridge.so "$RUNTIME/dkbridge/dkbridge.c" \
+gcc -O2 -shared -fPIC -Wall -o /opt/dk/libdkbridge.so \
+    "$RUNTIME/dkbridge/dkbridge.c" "$RUNTIME/dkbridge/dklang.c" \
     $(sdl2-config --cflags) -ldl -lpthread
 
 # 3. Rootfs minimal : uniquement les fichiers utilises (fermeture des dependances)

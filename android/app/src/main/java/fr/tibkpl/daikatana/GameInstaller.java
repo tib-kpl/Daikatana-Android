@@ -33,12 +33,14 @@ final class GameInstaller {
         final File baseDir;   // /game
         final File homeDir;   // /home/dk
         final File userDataDir;
+        final String language;  // english, french... (module dans /game/lang)
 
-        LaunchConfig(File rootfsDir, File baseDir, File homeDir, File userDataDir) {
+        LaunchConfig(File rootfsDir, File baseDir, File homeDir, File userDataDir, String language) {
             this.rootfsDir = rootfsDir;
             this.baseDir = baseDir;
             this.homeDir = homeDir;
             this.userDataDir = userDataDir;
+            this.language = language;
         }
     }
 
@@ -87,6 +89,15 @@ final class GameInstaller {
             chmod(engine, 0755);
         }
 
+        // Traduction : modules de langue officiels du patch 1.3, telecharges au besoin.
+        String language = GameData.getLanguage(context);
+        File langDir = new File(baseDir, "lang");
+        if (!language.equals("english") && !new File(langDir, "language_" + language + ".so").isFile()) {
+            progress.onStep(context.getString(R.string.install_language, 0));
+            LanguageDownloader.install(context.getCacheDir(), langDir,
+                    percent -> progress.onStep(context.getString(R.string.install_language, percent)));
+        }
+
         progress.onStep(context.getString(R.string.game_preparing));
         mkdirs(gameDir);
         mkdirs(saveGameDir);
@@ -99,7 +110,7 @@ final class GameInstaller {
 
         linkUserData(userDataDir, gameDir);
 
-        return new LaunchConfig(rootfsDir, baseDir, homeDir, userDataDir);
+        return new LaunchConfig(rootfsDir, baseDir, homeDir, userDataDir, language);
     }
 
     /**

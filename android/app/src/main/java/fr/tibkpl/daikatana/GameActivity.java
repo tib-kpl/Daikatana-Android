@@ -91,6 +91,7 @@ public class GameActivity extends Activity {
         try {
             audio = new AudioBridge(runtime.audioFifo());
             audio.start();
+            InputBridge.debug = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
             input = new InputBridge();
 
             Point screen = screenSize();
@@ -154,6 +155,21 @@ public class GameActivity extends Activity {
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
         if (input != null && input.onMotion(event)) return true;
         return super.dispatchGenericMotionEvent(event);
+    }
+
+    /** Appli en arriere-plan ou ecran verrouille : jeu fige et son coupe. */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (input != null) input.setPaused(true);
+        if (audio != null) audio.setPaused(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (audio != null) audio.setPaused(false);
+        if (input != null) input.setPaused(false);
     }
 
     @Override
