@@ -40,6 +40,7 @@ public class GameActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ControllerSettings.init(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
@@ -150,16 +151,22 @@ public class GameActivity extends Activity {
 
     private void addSettingsButton() {
         android.widget.ImageButton gear = new android.widget.ImageButton(this);
-        gear.setImageResource(android.R.drawable.ic_menu_manage);
+        gear.setImageResource(R.drawable.ic_settings);
         gear.setBackgroundColor(0x00000000);
         gear.setAlpha(0.45f);
         gear.setFocusable(false);
         gear.setContentDescription(getString(R.string.graphics_title));
         int size = Math.round(40 * getResources().getDisplayMetrics().density);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.END);
-        gear.setOnClickListener(v -> startActivity(new Intent(this, LauncherActivity.class)
-                .setAction(LauncherActivity.ACTION_SETTINGS).putExtra(LauncherActivity.EXTRA_RETURN_TO_GAME, true)));
+        gear.setOnClickListener(v -> startActivityForResult(new Intent(this, LauncherActivity.class)
+                .setAction(LauncherActivity.ACTION_SETTINGS).putExtra(LauncherActivity.EXTRA_RETURN_TO_GAME, true), 101));
         root.addView(gear, lp);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 101 && resultCode == Activity.RESULT_FIRST_USER) recreate();
     }
 
     private void addFpsCounter() {
@@ -191,7 +198,7 @@ public class GameActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        int keyCode = event.getKeyCode();
+        int keyCode = ControllerInput.key(event);
         boolean system = keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
                 || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE || keyCode == KeyEvent.KEYCODE_HOME;
         if (!system && input != null && input.onKey(event)) return true;

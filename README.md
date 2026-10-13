@@ -172,3 +172,7 @@ The settings gear pauses the current session. **Retour au jeu** resumes the same
 process. Graphics changes apply at the next launch: automatic selection, integrated Vulkan
 Turnip, software rendering for troubleshooting, 540p/720p/1080p and an engine FPS counter.
 The Adreno driver is included; no external driver ZIP is required.
+
+### Launcher and controller settings
+
+The gear opens the launcher settings. **Retour au jeu** resumes the current session and **Redemarrer le jeu** restarts the engine to apply changes. **Configurer la manette** detects connected Android controllers and stores button mappings and right-stick axis choices separately for each device. Generic button codes and RX/RY layouts are accepted. Physical AYN Thor validation remains pending.

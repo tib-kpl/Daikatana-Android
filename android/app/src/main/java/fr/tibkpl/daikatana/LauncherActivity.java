@@ -35,6 +35,7 @@ public class LauncherActivity extends Activity {
     private TextView status;
     private Button pickButton;
     private Button playButton;
+    private Button restartButton;
     private Button languageButton;
     private Button resolutionButton;
 
@@ -50,11 +51,14 @@ public class LauncherActivity extends Activity {
         status = findViewById(R.id.status);
         pickButton = findViewById(R.id.pick);
         playButton = findViewById(R.id.play);
+        restartButton = findViewById(R.id.restart);
+        restartButton.setOnClickListener(v -> { setResult(Activity.RESULT_FIRST_USER); finish(); });
         languageButton = findViewById(R.id.language);
         languageButton.setOnClickListener(v -> cycleLanguage());
         updateLanguageButton();
         resolutionButton = findViewById(R.id.resolution);
         resolutionButton.setOnClickListener(v -> openGraphicsSettings());
+        findViewById(R.id.controller).setOnClickListener(v -> ControllerSettings.show(this));
         updateResolutionButton();
         forcePick = ACTION_CHANGE_FOLDER.equals(getIntent().getAction()) || ACTION_SETTINGS.equals(getIntent().getAction());
     }
@@ -117,6 +121,7 @@ public class LauncherActivity extends Activity {
         updateLanguageButton();
         resolutionButton = findViewById(R.id.resolution);
         resolutionButton.setOnClickListener(v -> openGraphicsSettings());
+        findViewById(R.id.controller).setOnClickListener(v -> ControllerSettings.show(this));
         updateResolutionButton();
     }
 

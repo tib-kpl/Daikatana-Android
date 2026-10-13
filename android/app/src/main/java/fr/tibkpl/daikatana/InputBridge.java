@@ -154,8 +154,8 @@ final class InputBridge {
         if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_UP) return false;
         boolean down = action == KeyEvent.ACTION_DOWN;
         if (down && event.getRepeatCount() > 0) return true;
-        int keyCode = event.getKeyCode();
-        boolean fromGamepad = isGamepad(event.getSource());
+        int keyCode = ControllerInput.key(event);
+        boolean fromGamepad = isGamepad(event.getSource()) || ControllerInput.isController(event.getDevice()) || ControllerInput.isButton(keyCode);
 
         // Gachettes : envoyees comme touches clavier (R2 = Ctrl, L2 = Alt, liees a +attack et
         // +zoom par autoexec.cfg). Le moteur gere mal les gachettes de manette (tir qui ne
@@ -181,11 +181,12 @@ final class InputBridge {
 
     /** Sticks, gachettes analogiques et croix directionnelle "hat". */
     boolean onMotion(MotionEvent event) {
-        if (!isGamepad(event.getSource()) || event.getAction() != MotionEvent.ACTION_MOVE) return false;
+        if ((!isGamepad(event.getSource()) && !ControllerInput.isController(event.getDevice()))
+                || event.getAction() != MotionEvent.ACTION_MOVE) return false;
         axis(event, AXIS_LX, MotionEvent.AXIS_X, false);
         axis(event, AXIS_LY, MotionEvent.AXIS_Y, false);
-        axis(event, AXIS_RX, MotionEvent.AXIS_Z, false);
-        axis(event, AXIS_RY, MotionEvent.AXIS_RZ, false);
+        axis(event, AXIS_RX, ControllerInput.rightAxis(event, true), false);
+        axis(event, AXIS_RY, ControllerInput.rightAxis(event, false), false);
         if (!triggerKeys) {
             float lt = Math.max(event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE));
             float rt = Math.max(event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS));
