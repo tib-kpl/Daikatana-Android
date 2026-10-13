@@ -10,15 +10,15 @@ W=${DK_WIDTH:-1920}
 H=${DK_HEIGHT:-1080}
 
 mkdir -p "$HOME/.local/share/Daikatana/gamedata" /tmp/fb
-rm -f /tmp/.X0-lock /tmp/.X11-unix/X0 /tmp/fb/Xvfb_screen0
+rm -f /tmp/.X1-lock /tmp/.X11-unix/X1 /tmp/fb/Xvfb_screen0
 
-Xvfb :0 -screen 0 "${W}x${H}x24" -fbdir /tmp/fb -nolisten tcp -ac >/tmp/xvfb.log 2>&1 &
+Xvfb :1 -screen 0 "${W}x${H}x24" -fbdir /tmp/fb -nolisten tcp -ac >/tmp/xvfb.log 2>&1 &
 XVFB_PID=$!
 i=0
-while [ ! -S /tmp/.X11-unix/X0 ] && [ $i -lt 100 ]; do sleep 0.1; i=$((i + 1)); done
+while [ ! -S /tmp/.X11-unix/X1 ] && [ $i -lt 100 ]; do sleep 0.1; i=$((i + 1)); done
 
 cd /game || exit 1
-export DISPLAY=:0
+export DISPLAY=:1
 export LD_LIBRARY_PATH=/game/libs.aarch64
 export LD_PRELOAD=/opt/dk/libdkbridge.so
 
