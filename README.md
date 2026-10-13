@@ -165,3 +165,10 @@ adb, outside of the app.
   X.Org Xvfb, glibc…), each under its own license.
 - License details and source code access: [THIRD_PARTY.md](THIRD_PARTY.md).
 - OpenKatana's icon and artwork are original creations of this project.
+
+## Graphics and returning to a running game
+
+The settings gear pauses the current session. **Retour au jeu** resumes the same engine
+process. Graphics changes apply at the next launch: automatic selection, integrated Vulkan
+Turnip, software rendering for troubleshooting, 540p/720p/1080p and an engine FPS counter.
+The Adreno driver is included; no external driver ZIP is required.

@@ -27,9 +27,11 @@ final class GameData {
     private static final String KEY_LANGUAGE = "language";
     private static final String KEY_RENDER_HEIGHT = "render_height";
     private static final String KEY_GPU_FAILED = "gpu_failed";
+    private static final String KEY_RENDERER = "renderer";
+    private static final String KEY_SHOW_FPS = "show_fps";
 
     /** Hauteurs de rendu proposees (largeur au format de l'ecran) : 720p fluide, 1080p net. */
-    static final int[] RENDER_HEIGHTS = {720, 1080};
+    static final int[] RENDER_HEIGHTS = {540, 720, 1080};
 
     /** Langues du patch 1.3 : code du module (language_<code>.so) et nom affiche. */
     static final String[] LANGUAGES = {"english", "french", "german", "italian", "spanish"};
@@ -69,11 +71,18 @@ final class GameData {
     }
 
     static int getRenderHeight(Context context) {
-        return prefs(context).getInt(KEY_RENDER_HEIGHT, RENDER_HEIGHTS[0]);
+        return prefs(context).getInt(KEY_RENDER_HEIGHT, 720);
     }
 
     static void saveRenderHeight(Context context, int height) {
         prefs(context).edit().putInt(KEY_RENDER_HEIGHT, height).apply();
+    }
+
+    static String getRenderer(Context context) { return prefs(context).getString(KEY_RENDERER, "auto"); }
+    static boolean showFps(Context context) { return prefs(context).getBoolean(KEY_SHOW_FPS, false); }
+    static void saveGraphics(Context context, int height, String renderer, boolean fps) {
+        prefs(context).edit().putInt(KEY_RENDER_HEIGHT, height).putString(KEY_RENDERER, renderer)
+                .putBoolean(KEY_SHOW_FPS, fps).putBoolean(KEY_GPU_FAILED, false).apply();
     }
 
     /** Vrai si le rendu GPU a echoue sur cet appareil : on reste alors en rendu logiciel. */

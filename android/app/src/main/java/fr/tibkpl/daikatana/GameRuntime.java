@@ -71,6 +71,9 @@ final class GameRuntime {
         bind(cmd, new File(rootfs, "tmp").getAbsolutePath() + ":/dev/shm");
         bind(cmd, config.baseDir.getAbsolutePath() + ":/game");
         bind(cmd, config.homeDir.getAbsolutePath() + ":/home/dk");
+        File stats = new File(context.getFilesDir(), "render-stats");
+        if (!stats.isDirectory() && !stats.mkdirs()) throw new IOException("Creation du dossier FPS impossible");
+        bind(cmd, stats.getAbsolutePath() + ":/logs");
         cmd.add("-w");
         cmd.add("/game");
         cmd.add("/usr/bin/env");
@@ -84,6 +87,7 @@ final class GameRuntime {
         cmd.add("DK_LANGUAGE=" + config.language);
         cmd.add("DK_LANG_DIR=/game/lang");
         cmd.add("DK_RENDERER=" + (gpu ? "gpu" : "software"));
+        cmd.add("DK_LOG_DIR=/logs");
         cmd.add("/bin/sh");
         cmd.add("/opt/dk/run.sh");
 

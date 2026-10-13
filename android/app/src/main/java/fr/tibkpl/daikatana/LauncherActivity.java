@@ -2,6 +2,11 @@ package fr.tibkpl.daikatana;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -24,6 +29,8 @@ public class LauncherActivity extends Activity {
 
     private static final int REQ_PICK_FOLDER = 1;
     private static final int REQ_PERMISSION = 2;
+    static final String ACTION_SETTINGS = "fr.tibkpl.daikatana.SETTINGS";
+    static final String EXTRA_RETURN_TO_GAME = "return_to_game";
 
     private TextView status;
     private Button pickButton;
@@ -47,9 +54,9 @@ public class LauncherActivity extends Activity {
         languageButton.setOnClickListener(v -> cycleLanguage());
         updateLanguageButton();
         resolutionButton = findViewById(R.id.resolution);
-        resolutionButton.setOnClickListener(v -> cycleResolution());
+        resolutionButton.setOnClickListener(v -> openGraphicsSettings());
         updateResolutionButton();
-        forcePick = ACTION_CHANGE_FOLDER.equals(getIntent().getAction());
+        forcePick = ACTION_CHANGE_FOLDER.equals(getIntent().getAction()) || ACTION_SETTINGS.equals(getIntent().getAction());
     }
 
     @Override
@@ -73,7 +80,7 @@ public class LauncherActivity extends Activity {
         String saved = GameData.getSavedPath(this);
         File dataDir = saved == null ? null : GameData.findDataDir(new File(saved));
 
-        if (dataDir != null && !forcePick && pickError == null) {
+        if (dataDir != null && !forcePick && pickError == null && !getIntent().getBooleanExtra(EXTRA_RETURN_TO_GAME, false)) {
             launchGame(dataDir);
             return;
         }
@@ -92,7 +99,9 @@ public class LauncherActivity extends Activity {
 
         if (dataDir != null) {
             playButton.setVisibility(Button.VISIBLE);
-            playButton.setOnClickListener(v -> launchGame(dataDir));
+            boolean returnToGame = getIntent().getBooleanExtra(EXTRA_RETURN_TO_GAME, false);
+            playButton.setText(returnToGame ? R.string.btn_return_game : R.string.btn_play);
+            playButton.setOnClickListener(v -> { if (returnToGame) finish(); else launchGame(dataDir); });
             playButton.requestFocus();
         } else {
             playButton.setVisibility(Button.GONE);
@@ -107,7 +116,7 @@ public class LauncherActivity extends Activity {
         GameData.saveLanguage(this, GameData.LANGUAGES[(i + 1) % GameData.LANGUAGES.length]);
         updateLanguageButton();
         resolutionButton = findViewById(R.id.resolution);
-        resolutionButton.setOnClickListener(v -> cycleResolution());
+        resolutionButton.setOnClickListener(v -> openGraphicsSettings());
         updateResolutionButton();
     }
 
@@ -115,16 +124,49 @@ public class LauncherActivity extends Activity {
         languageButton.setText(getString(R.string.btn_language, GameData.languageName(GameData.getLanguage(this))));
     }
 
-    private void cycleResolution() {
-        int current = GameData.getRenderHeight(this);
-        GameData.saveRenderHeight(this, current == GameData.RENDER_HEIGHTS[0]
-                ? GameData.RENDER_HEIGHTS[1] : GameData.RENDER_HEIGHTS[0]);
-        updateResolutionButton();
+    private void openGraphicsSettings() {
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        int padding = Math.round(20 * getResources().getDisplayMetrics().density);
+        content.setPadding(padding, padding / 2, padding, 0);
+        TextView driverLabel = new TextView(this);
+        driverLabel.setText(R.string.graphics_driver);
+        content.addView(driverLabel);
+        Spinner driver = new Spinner(this);
+        String[] rendererIds = {"auto", "turnip", "software"};
+        String[] rendererLabels = getResources().getStringArray(R.array.graphics_drivers);
+        driver.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, rendererLabels));
+        for (int i = 0; i < rendererIds.length; i++) if (rendererIds[i].equals(GameData.getRenderer(this))) driver.setSelection(i);
+        content.addView(driver);
+        TextView resolutionLabel = new TextView(this);
+        resolutionLabel.setText(R.string.graphics_resolution);
+        content.addView(resolutionLabel);
+        Spinner resolution = new Spinner(this);
+        resolution.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                getResources().getStringArray(R.array.graphics_resolutions)));
+        for (int i = 0; i < GameData.RENDER_HEIGHTS.length; i++)
+            if (GameData.RENDER_HEIGHTS[i] == GameData.getRenderHeight(this)) resolution.setSelection(i);
+        content.addView(resolution);
+        CheckBox fps = new CheckBox(this);
+        fps.setText(R.string.graphics_fps);
+        fps.setChecked(GameData.showFps(this));
+        content.addView(fps);
+        TextView help = new TextView(this);
+        help.setText(R.string.graphics_help);
+        help.setTextSize(12);
+        content.addView(help);
+        new AlertDialog.Builder(this).setTitle(R.string.graphics_title).setView(content)
+                .setPositiveButton(R.string.graphics_apply, (d, which) -> {
+                    GameData.saveGraphics(this, GameData.RENDER_HEIGHTS[resolution.getSelectedItemPosition()],
+                            rendererIds[driver.getSelectedItemPosition()], fps.isChecked());
+                    updateResolutionButton();
+                }).setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private void updateResolutionButton() {
-        boolean smooth = GameData.getRenderHeight(this) == GameData.RENDER_HEIGHTS[0];
-        resolutionButton.setText(smooth ? R.string.btn_resolution_720 : R.string.btn_resolution_1080);
+        resolutionButton.setText(getString(R.string.graphics_summary, GameData.getRenderHeight(this),
+                getResources().getStringArray(R.array.graphics_drivers)[
+                        "software".equals(GameData.getRenderer(this)) ? 2 : "turnip".equals(GameData.getRenderer(this)) ? 1 : 0]));
     }
 
     private void launchGame(File dataDir) {
@@ -142,7 +184,8 @@ public class LauncherActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQ_PICK_FOLDER || resultCode != RESULT_OK || data == null) return;
+        if (resultCode != RESULT_OK || data == null) return;
+        if (requestCode != REQ_PICK_FOLDER) return;
 
         File picked = GameData.treeUriToFile(data.getData());
         if (picked == null) {

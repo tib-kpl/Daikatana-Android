@@ -27,4 +27,22 @@
 (une seule fois)</string>
     <string name="install_port">Téléchargement du moteur depuis PortMaster… %1$d %%
 (première fois uniquement, connexion Internet requise)</string>
+    <string name="btn_return_game">Retour au jeu</string>
+    <string name="graphics_title">Graphismes</string>
+    <string name="graphics_driver">Pilote graphique</string>
+    <string name="graphics_resolution">Résolution de rendu</string>
+    <string name="graphics_fps">Afficher les FPS du moteur</string>
+    <string name="graphics_apply">Appliquer</string>
+    <string name="graphics_summary">Graphismes : %1$dp · %2$s</string>
+    <string name="graphics_help">Pour améliorer la fluidité, essayez Turnip et 540p. Le rendu logiciel sert au dépannage et sera plus lent. Le pilote et la résolution prennent effet au prochain lancement ; les FPS changent dès le retour au jeu.</string>
+    <string-array name="graphics_drivers">
+        <item>Automatique</item>
+        <item>Vulkan · Turnip intégré</item>
+        <item>Logiciel · dépannage</item>
+    </string-array>
+    <string-array name="graphics_resolutions">
+        <item>540p · performance</item>
+        <item>720p · équilibre</item>
+        <item>1080p · netteté</item>
+    </string-array>
 </resources>

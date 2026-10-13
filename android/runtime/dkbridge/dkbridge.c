@@ -37,6 +37,9 @@ static SDL_Joystick *volatile virtual_joy;
 static int started;
 static int frames;
 static int paused;
+static FILE *stats_file;
+static uint32_t stats_start;
+static unsigned stats_frames;
 static pthread_mutex_t pause_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t pause_cond = PTHREAD_COND_INITIALIZER;
 
@@ -78,7 +81,10 @@ static void set_paused(int value)
 static void wait_while_paused(void)
 {
     pthread_mutex_lock(&pause_lock);
-    while (paused) pthread_cond_wait(&pause_cond, &pause_lock);
+    while (paused) {
+        stats_start = 0; stats_frames = 0;
+        pthread_cond_wait(&pause_cond, &pause_lock);
+    }
     pthread_mutex_unlock(&pause_lock);
 }
 
@@ -178,6 +184,12 @@ static void bridge_start(void)
     pthread_t thread;
     if (started) return;
     started = 1;
+    const char *dir = getenv("DK_LOG_DIR");
+    if (dir) {
+        char path[4096];
+        snprintf(path, sizeof(path), "%s/render-fps.txt", dir);
+        stats_file = fopen(path, "w");
+    }
     if (pthread_create(&thread, NULL, input_thread, NULL) == 0) pthread_detach(thread);
 }
 
@@ -196,6 +208,17 @@ void SDL_GL_SwapWindow(SDL_Window *window)
     static void (*real_swap)(SDL_Window *);
     if (!real_swap) real_swap = (void (*)(SDL_Window *))dlsym(RTLD_NEXT, "SDL_GL_SwapWindow");
     real_swap(window);
+    if (stats_file) {
+        uint32_t now = SDL_GetTicks();
+        if (!stats_start) stats_start = now;
+        else if (++stats_frames && (uint32_t)(now - stats_start) >= 1000) {
+            rewind(stats_file);
+            fprintf(stats_file, "%.1f\n", stats_frames * 1000.0 / (uint32_t)(now - stats_start));
+            fflush(stats_file);
+            ftruncate(fileno(stats_file), ftell(stats_file));
+            stats_frames = 0; stats_start = now;
+        }
+    }
     dklang_frame();
     wait_while_paused();
     if (++frames == ATTACH_AFTER_FRAMES) attach_virtual_controller();

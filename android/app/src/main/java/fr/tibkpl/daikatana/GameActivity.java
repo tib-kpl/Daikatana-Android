@@ -31,6 +31,7 @@ public class GameActivity extends Activity {
 
     private FrameLayout root;
     private TextView message;
+    private TextView fpsCounter;
     private GameRuntime runtime;
     private InputBridge input;
     private AudioBridge audio;
@@ -56,6 +57,7 @@ public class GameActivity extends Activity {
         root.addView(message, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(root);
+        addSettingsButton();
         hideSystemBars();
 
         String path = getIntent().getStringExtra(EXTRA_DATA_DIR);
@@ -99,12 +101,13 @@ public class GameActivity extends Activity {
             root.addView(view, 0, new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
-            boolean gpu = runtime.gpuAvailable() && !GameData.isGpuFailed(this);
+            boolean gpu = runtime.gpuAvailable() && !"software".equals(GameData.getRenderer(this)) && !GameData.isGpuFailed(this);
             Log.i(TAG, "Rendu " + (gpu ? "GPU (Turnip + Zink)" : "logiciel") + ", " + width + "x" + height);
             java.lang.Process process = runtime.start(width, height, input.port(), gpu);
             message.setText(R.string.game_starting);
             message.postDelayed(() -> message.setVisibility(View.GONE), 4000);
             watch(process, gpu);
+            addFpsCounter();
         } catch (Exception e) {
             Log.e(TAG, "Lancement", e);
             message.setText(getString(R.string.game_error, e.getMessage()));
@@ -145,6 +148,47 @@ public class GameActivity extends Activity {
         watcher.start();
     }
 
+    private void addSettingsButton() {
+        android.widget.ImageButton gear = new android.widget.ImageButton(this);
+        gear.setImageResource(android.R.drawable.ic_menu_manage);
+        gear.setBackgroundColor(0x00000000);
+        gear.setAlpha(0.45f);
+        gear.setFocusable(false);
+        gear.setContentDescription(getString(R.string.graphics_title));
+        int size = Math.round(40 * getResources().getDisplayMetrics().density);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.END);
+        gear.setOnClickListener(v -> startActivity(new Intent(this, LauncherActivity.class)
+                .setAction(LauncherActivity.ACTION_SETTINGS).putExtra(LauncherActivity.EXTRA_RETURN_TO_GAME, true)));
+        root.addView(gear, lp);
+    }
+
+    private void addFpsCounter() {
+        TextView fps = new TextView(this);
+        fpsCounter = fps;
+        fps.setVisibility(GameData.showFps(this) ? View.VISIBLE : View.GONE);
+        fps.setTextColor(0xffffffff);
+        fps.setBackgroundColor(0x99000000);
+        fps.setTextSize(12);
+        fps.setPadding(12, 6, 12, 6);
+        fps.setFocusable(false);
+        root.addView(fps, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.START));
+        File stats = new File(getFilesDir(), "render-stats/render-fps.txt");
+        fps.post(new Runnable() {
+            @Override public void run() {
+                if (finishing || isFinishing() || isDestroyed()) return;
+                String value = "—";
+                try {
+                    String reading = new String(java.nio.file.Files.readAllBytes(stats.toPath()),
+                            java.nio.charset.StandardCharsets.UTF_8).trim();
+                    if (reading.matches("[0-9]+\\.[0-9]")) value = reading;
+                } catch (Exception ignored) { }
+                fps.setText(value + " FPS");
+                fps.postDelayed(this, 1000);
+            }
+        });
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int keyCode = event.getKeyCode();
@@ -171,6 +215,7 @@ public class GameActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (fpsCounter != null) fpsCounter.setVisibility(GameData.showFps(this) ? View.VISIBLE : View.GONE);
         if (audio != null) audio.setPaused(false);
         if (input != null) input.setPaused(false);
     }
