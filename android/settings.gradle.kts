@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "OpenKatana"
+rootProject.name = "Daikatana"
 include(":app")

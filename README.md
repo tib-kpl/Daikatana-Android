@@ -1,11 +1,11 @@
-# OpenKatana
+# Daikatana-Android
 
 **Unofficial** Android launcher to play **Daikatana** (Ion Storm, 2000) on ARM64 Android
 handhelds and phones, using the engine of the community **Daikatana 1.3** patch, through its
 PortMaster port.
 
 > [!IMPORTANT]
-> **You must own the game.** OpenKatana contains **no game files**: no levels, textures,
+> **You must own the game.** Daikatana contains **no game files**: no levels, textures,
 > sounds or music. It does not contain the Daikatana 1.3 engine either. To play, you need a
 > legal copy of Daikatana for PC (for example from [GOG](https://www.gog.com/game/daikatana)
 > or [Steam](https://store.steampowered.com/app/242980/Daikatana/)), and you must copy its
@@ -29,17 +29,17 @@ Tested on the **AYN Odin 2 Portal** (Snapdragon 8 Gen 2, Android 13).
 
 ## Installation
 
-1. Download `OpenKatana-x.y.z.apk` from the [Releases](../../releases) page and install it
+1. Download `Daikatana-x.y.z.apk` from the [Releases](../../releases) page and install it
    (allow installing apps from unknown sources).
 2. Copy the `data` folder of your PC Daikatana installation to the device, for example to
    `ROMS/PC/Daikatana/data` on the SD card. A Windows installation patched to 1.3 works too;
    its extra files (`pak4.pak` to `pak6.pak`, voice packs…) are used.
-3. Start **OpenKatana**:
+3. Start **Daikatana**:
    - grant **all files access**: the engine reads the game files where they are, without
      copying them;
    - pick the `data` folder (or the folder that contains it);
    - optionally, choose the game language.
-4. On first launch, OpenKatana installs its Linux runtime and **downloads the engine** (the
+4. On first launch, Daikatana installs its Linux runtime and **downloads the engine** (the
    PortMaster Daikatana port, 14 MB) from PortMaster's official source. For a language other
    than English, it also downloads the official language modules of the 1.3 patch (22 MB)
    from its GitHub releases. An Internet connection is required that first time only.
@@ -48,7 +48,7 @@ To change the game folder later: **long-press the icon → "Changer le dossier d
 
 ### Gamepad controls
 
-OpenKatana uses a classic FPS layout. It is applied at every launch, like the port's
+Daikatana uses a classic FPS layout. It is applied at every launch, like the port's
 `gamecontroller.cfg`.
 
 | Button | Action |
@@ -79,7 +79,7 @@ OpenKatana uses a classic FPS layout. It is applied at every launch, like the po
 The engine is the PortMaster port of Daikatana 1.3, downloaded from
 [PortMaster](https://github.com/PortsMaster/PortMaster-New) on first launch (MD5 checked).
 It is a **Linux** ARM64 executable (glibc, SDL2, OpenAL) that Android cannot run directly, so
-OpenKatana provides a small Linux environment, like PortMaster does on Linux handhelds:
+Daikatana provides a small Linux environment, like PortMaster does on Linux handhelds:
 
 ```
 Android app (Java)
@@ -164,7 +164,7 @@ adb, outside of the app.
 - **Linux runtime**: [Debian](https://www.debian.org) 13 packages (SDL2, OpenAL Soft, Mesa,
   X.Org Xvfb, glibc…), each under its own license.
 - License details and source code access: [THIRD_PARTY.md](THIRD_PARTY.md).
-- OpenKatana's icon and artwork are original creations of this project.
+- Daikatana's icon and artwork are original creations of this project.
 
 ## Graphics and returning to a running game
 

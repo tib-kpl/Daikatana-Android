@@ -1,6 +1,6 @@
 # Third-party software
 
-OpenKatana redistributes the following free software in binary form inside its APK. Their
+Daikatana redistributes the following free software in binary form inside its APK. Their
 source code is available at the addresses below.
 
 ## proot
@@ -15,7 +15,7 @@ source code is available at the addresses below.
 ## Linux runtime (Debian 13 "trixie" arm64 packages)
 
 The bundled rootfs (`assets/runtime/rootfs.tgz`) only contains files from unmodified Debian
-packages, plus OpenKatana's own files under `/opt/dk` and `/etc/asound.conf`, and the Mesa
+packages, plus Daikatana's own files under `/opt/dk` and `/etc/asound.conf`, and the Mesa
 build described below under `/opt/turnip`. Its main
 components are glibc, SDL2, OpenAL Soft, Mesa, the X.Org Xvfb server, libvorbis and dash.
 

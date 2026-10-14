@@ -117,7 +117,7 @@ jobs:
           echo "OPENKATANA_VERSION_NAME=$NAME" >> "$GITHUB_ENV"
           echo "OPENKATANA_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
           echo "RELEASE_TAG=v$NAME" >> "$GITHUB_ENV"
-          echo "APK_NAME=OpenKatana-$NAME.apk" >> "$GITHUB_ENV"
+          echo "APK_NAME=Daikatana-$NAME.apk" >> "$GITHUB_ENV"
 
       - name: Compilation
         env:
@@ -141,7 +141,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          name: OpenKatana ${{ env.OPENKATANA_VERSION_NAME }}
+          name: Daikatana ${{ env.OPENKATANA_VERSION_NAME }}
           target_commitish: ${{ github.sha }}
           files: |
             android/${{ env.APK_NAME }}

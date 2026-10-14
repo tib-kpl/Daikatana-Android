@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OpenKatana</string>
+    <string name="app_name">Daikatana</string>
     <string name="app_subtitle">Lanceur non officiel - nécessite les fichiers PC de Daikatana</string>
     <string name="shortcut_change_folder">Changer le dossier du jeu</string>
 
@@ -11,7 +11,7 @@
     <string name="btn_resolution_1080">Résolution : 1080p (net)</string>
     <string name="btn_language">Langue du jeu : %1$s</string>
 
-    <string name="status_need_permission">OpenKatana a besoin de l\'accès aux fichiers pour lire les données du jeu (pak1.pak, pak2.pak, pak3.pak).</string>
+    <string name="status_need_permission">Daikatana a besoin de l\'accès aux fichiers pour lire les données du jeu (pak1.pak, pak2.pak, pak3.pak).</string>
     <string name="status_no_folder">Fichiers du jeu introuvables.\n\nCopiez le dossier « data » de votre Daikatana (PC/GOG/Steam) sur la console, puis sélectionnez-le.\n\nFichiers requis : %1$s</string>
     <string name="status_saved_missing">Les fichiers du jeu ne sont plus présents dans :\n%1$s\n\nFichiers manquants : %2$s\n\nSélectionnez à nouveau le dossier du jeu.</string>
     <string name="status_pick_invalid">Le dossier sélectionné ne contient pas les fichiers du jeu :\n%1$s\n\nFichiers manquants : %2$s\n\nSélectionnez le dossier « data » de Daikatana (ou le dossier qui le contient).</string>
