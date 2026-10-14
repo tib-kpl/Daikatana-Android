@@ -65,6 +65,13 @@ final class GameRuntime {
         cmd.add("-r");
         cmd.add(rootfs.getAbsolutePath());
         bind(cmd, "/dev");
+        // Android owns the physical controllers. Some handhelds also expose their evdev
+        // nodes to Linux; hide those here so SDL only opens our mapped virtual controller.
+        File inputDevices = new File(context.getFilesDir(), "linux-input");
+        if (!inputDevices.isDirectory() && !inputDevices.mkdirs()) {
+            throw new IOException("Creation du dossier des entrees impossible");
+        }
+        bind(cmd, inputDevices.getAbsolutePath() + ":/dev/input");
         bind(cmd, "/proc");
         bind(cmd, "/sys");
         bind(cmd, "/storage");
@@ -88,6 +95,7 @@ final class GameRuntime {
         cmd.add("DK_LANG_DIR=/game/lang");
         cmd.add("DK_RENDERER=" + (gpu ? "gpu" : "software"));
         cmd.add("DK_LOG_DIR=/logs");
+        cmd.add("SDL_JOYSTICK_HIDAPI=0");
         cmd.add("/bin/sh");
         cmd.add("/opt/dk/run.sh");
 

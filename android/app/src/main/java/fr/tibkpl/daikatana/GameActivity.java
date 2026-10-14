@@ -34,6 +34,7 @@ public class GameActivity extends Activity {
     private TextView fpsCounter;
     private GameRuntime runtime;
     private InputBridge input;
+    private ControllerMonitor controllerMonitor;
     private AudioBridge audio;
     private volatile boolean finishing;
 
@@ -90,6 +91,7 @@ public class GameActivity extends Activity {
             audio.start();
             InputBridge.debug = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
             input = new InputBridge();
+            controllerMonitor = new ControllerMonitor(this, input::resetController);
 
             Point screen = screenSize();
             // Hauteur de rendu choisie (largeur au format de l'ecran, donc 16:9 sur un ecran
@@ -232,6 +234,7 @@ public class GameActivity extends Activity {
         finishing = true;
         if (runtime != null) runtime.stop();
         if (audio != null) audio.stop();
+        if (controllerMonitor != null) controllerMonitor.close();
         if (input != null) input.close();
         super.onDestroy();
     }

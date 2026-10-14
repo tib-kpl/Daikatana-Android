@@ -94,7 +94,7 @@ final class InputBridge {
     private volatile byte[] lastPause;
     private final int[] axes = new int[6];
     private int hatX;
-    private boolean triggerKeys; // la manette envoie des touches L2/R2
+    private final TriggerState triggerState = new TriggerState();
     private final boolean[] triggers = new boolean[2];
     private static final int SCANCODE_LCTRL = 224;
     private static final int SCANCODE_LALT = 226;
@@ -134,6 +134,14 @@ final class InputBridge {
         }
     }
 
+    void resetController() {
+        for (int button = 0; button <= BTN_DPAD_RIGHT; button++) send(MSG_BUTTON, button, 0);
+        for (int axis = 0; axis < axes.length; axis++) setAxis(axis, 0);
+        hatX = hatY = 0;
+        triggerState.clear();
+        for (int trigger = 0; trigger < 2; trigger++) setTrigger(trigger, false);
+    }
+
     void close() {
         closed = true;
         try {
@@ -145,6 +153,7 @@ final class InputBridge {
 
     /** Fige (true) ou relance (false) la boucle du jeu. */
     void setPaused(boolean paused) {
+        if (paused) resetController();
         send(MSG_PAUSE, 0, paused ? 1 : 0);
     }
 
@@ -159,11 +168,11 @@ final class InputBridge {
 
         // Gachettes : envoyees comme touches clavier (R2 = Ctrl, L2 = Alt, liees a +attack et
         // +zoom par autoexec.cfg). Le moteur gere mal les gachettes de manette (tir qui ne
-        // s'arrete plus). Si la manette envoie des touches L2/R2 (comme l'Odin), elles font
-        // foi et l'axe analogique est ignore.
+        // s'arrete plus). Les touches et axes sont fusionnes pour les manettes qui
+        // transmettent les deux, comme les manettes PlayStation et les consoles AYN.
         if (keyCode == KeyEvent.KEYCODE_BUTTON_L2 || keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
-            triggerKeys = true;
-            setTrigger(keyCode == KeyEvent.KEYCODE_BUTTON_R2 ? 1 : 0, down);
+            int trigger = keyCode == KeyEvent.KEYCODE_BUTTON_R2 ? 1 : 0;
+            setTrigger(trigger, triggerState.button(trigger, down));
             return true;
         }
         int button = BUTTONS.get(keyCode, -1);
@@ -187,12 +196,8 @@ final class InputBridge {
         axis(event, AXIS_LY, MotionEvent.AXIS_Y, false);
         axis(event, AXIS_RX, ControllerInput.rightAxis(event, true), false);
         axis(event, AXIS_RY, ControllerInput.rightAxis(event, false), false);
-        if (!triggerKeys) {
-            float lt = Math.max(event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE));
-            float rt = Math.max(event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS));
-            analogTrigger(0, lt);
-            analogTrigger(1, rt);
-        }
+        analogTrigger(0, Math.max(event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE)));
+        analogTrigger(1, Math.max(event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS)));
 
         int newHatX = Math.round(event.getAxisValue(MotionEvent.AXIS_HAT_X));
         int newHatY = Math.round(event.getAxisValue(MotionEvent.AXIS_HAT_Y));
@@ -224,8 +229,7 @@ final class InputBridge {
 
     /** Gachette analogique -> appui franc, avec hysteresis (enfoncee > 50 %, relachee < 25 %). */
     private void analogTrigger(int trigger, float value) {
-        if (!triggers[trigger] && value > 0.5f) setTrigger(trigger, true);
-        else if (triggers[trigger] && value < 0.25f) setTrigger(trigger, false);
+        setTrigger(trigger, triggerState.axis(trigger, value));
     }
 
     /** trigger 0 = L2 (Alt gauche), 1 = R2 (Ctrl gauche). */

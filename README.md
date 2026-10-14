@@ -51,6 +51,12 @@ To change the game folder later: **long-press the icon → "Changer le dossier d
 Daikatana uses a classic FPS layout. It is applied at every launch, like the port's
 `gamecontroller.cfg`.
 
+Controller input is read by Android and forwarded to a single SDL virtual controller.
+The Linux runtime hides physical input nodes so handhelds such as the AYN Thor cannot
+open a second controller with a different mapping. The Odin 2 Portal uses the same
+Android mappings as before. Per-device button and right-stick settings remain available
+in **Configurer la manette**.
+
 | Button | Action |
 |---|---|
 | Left / right stick | Move / aim |
@@ -176,3 +182,17 @@ The Adreno driver is included; no external driver ZIP is required.
 ### Launcher and controller settings
 
 The gear opens the launcher settings. **Retour au jeu** resumes the current session and **Redemarrer le jeu** restarts the engine to apply changes. **Configurer la manette** detects connected Android controllers and stores button mappings and right-stick axis choices separately for each device. Generic button codes and RX/RY layouts are accepted. Physical AYN Thor validation remains pending.
+
+### External controllers
+
+Xbox, PlayStation (DualShock / DualSense), Switch-style and generic Android gamepads
+use Android's standard button positions over USB or Bluetooth. The configuration screen
+shows the corresponding physical button labels for Microsoft, Sony and Nintendo devices;
+other controllers keep the generic A/B/X/Y labels. Custom bindings remain saved per device.
+Both digital and analog triggers are accepted and merged, with no duplicate action.
+Right-stick Z/RZ and RX/RY layouts and device dead zones are handled; held actions are
+released when a controller disconnects or is reconfigured. Linux cannot open a second
+copy of the physical controller alongside the Android input bridge.
+
+Odin 2 Portal mappings are preserved. AYN Thor menu and in-game controls were validated in Daikatana.
+The other ports use the same Android controller normalization. Xbox, DualSense and Switch controllers still need physical testing.
